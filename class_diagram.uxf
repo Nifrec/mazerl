@@ -125,8 +125,9 @@ m2=*</panel_attributes>
     <panel_attributes>*MazeLayout*
 --
 -lines: Set
+-end: Point
+-start: Point
 --
-+__iter__(): Line
 +ball_colides_wall(bal: Ball): Boolean
 +render(): Surface
 
@@ -229,5 +230,32 @@ resets when dead/won)
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
     <additional_attributes>220.0;110.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1220</x>
+      <y>500</y>
+      <w>70</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>*Point*
+--
++x
++y
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1240</x>
+      <y>390</y>
+      <w>40</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m2=2</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;110.0</additional_attributes>
   </element>
 </diagram>
