@@ -4,10 +4,10 @@ File to test the MazeLayout class of model.py
 Author: Lulof Pirée
 """
 import unittest
-from model import Ball, Line, MazeLayout
+from model import Ball, Line, Size, MazeLayout
+import numpy as np
 
-class MazeLayoutTestCase(unittest.TestCase):
-
+class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
 
     def test_get_ball_hits_wall_1(self):
         """
@@ -150,6 +150,41 @@ class MazeLayoutTestCase(unittest.TestCase):
         layout = MazeLayout(lines)
 
         assert (layout.get_ball_hits_wall(ball) == False)
+
+class MazeLayoutValidLinesTestCase(unittest.TestCase):
+
+    START_DUMMY = np.array([0, 0])
+    END_DUMMY = np.array([0, 0])
+
+    def test_check_valid_lines_1(self):
+        """
+        Base case: Lines fit in size.
+        """
+        lines = set([
+                Line(0, 3, 3, 0),
+                Line(0, 9, 0, 9),
+                Line(1, 2, 3, 4)
+        ])
+        size = Size(10, 10)
+        # Fails if error is raised.
+        layout = MazeLayout(lines, self.START_DUMMY, self.END_DUMMY, size)
+
+    def test_check_valid_lines_2(self):
+        """
+        Base case: Lines do not fit in size.
+        """
+        lines = set([
+                Line(0, 3, 3, 0),
+                Line(0, 9, 0, 9),
+                Line(5, 5, 10, 9), # Doesn't fit
+                Line(1, 2, 3, 4)
+        ])
+        size = Size(10, 10)
+        try:
+            layout = MazeLayout(lines, self.START_DUMMY, self.END_DUMMY, size)
+            self.fail()
+        except ValueError:
+            pass
 
 if (__name__ == "__main__"):
     unittest.main()

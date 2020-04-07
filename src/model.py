@@ -7,6 +7,12 @@ import math
 import numpy as np
 from numpy import linalg as LA
 
+def check_validity_point(point: np.ndarray):
+    if not isinstance(point, np.ndarray):
+        raise ValueError("Invalid input point, np.ndarray expected."
+    if not (len(point) == 2):
+        raise ValueError("Invalid input point, length 2 expected."
+
 class Size():
     """
     Record type for width & height of rectangular coordinate planes.
@@ -58,31 +64,35 @@ class MazeLayout():
         * end_point: [x, y] array, exit coordinates of maze (i.e. the player's
                 goal)
         """
-        assert(isinstance(lines, set))
-        self.__lines = lines
-        assert(len(start_point) == 2)
-        self.__start = start_point
-        assert(len(end_point) == 2)
-        self.__end = end_point
+        self.__check_validity_lines(lines)
+        check_validity_point(start_point)
+        check_validity_point(end_point)
         assert(isinstance(size, Size))
+
+        self.__lines = lines
+        self.__start = start_point
+        self.__end = end_point
         self.__size = size
 
-    def __check_valid_lines():
+    def __check_validity_lines(lines):
         """
         Checks if all the line endpoints are within the Size
-        of this MazeLayout.
+        of this MazeLayout. Not that, because indices start at 0,
+        a line's coordinates must be strictly less than the maxima of the
+        size.
         Returns:
         * Boolean: True if all lines in the rectange defined by (0, 0)
                 and self.__size.
         """
+        assert(isinstance(lines, set))
         assert False: "TODO: test this"
         line_is_valid
-        for line in self.__lines:
+        for line in lines:
+            assert(isinstance(line, Line))
             for point in (line.p0, line.p1):
                 if (point[0] < 0) or (point[1] < 0) \
-                    or (point[0] > self.size.x) or (point[0] > self.size.y):
-                    return False
-        return True
+                    or (point[0] >= self.size.x) or (point[0] >= self.size.y):
+                    raise ValueError("Invalid input line set.")
 
     def get_ball_hits_wall(self, ball):
         assert(isinstance(ball, Ball))
