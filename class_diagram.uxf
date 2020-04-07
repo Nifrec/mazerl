@@ -106,13 +106,13 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1090</x>
-      <y>390</y>
+      <y>430</y>
       <w>40</w>
-      <h>90</h>
+      <h>50</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 m2=*</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;30.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
@@ -120,7 +120,7 @@ m2=*</panel_attributes>
       <x>970</x>
       <y>270</y>
       <w>340</w>
-      <h>130</h>
+      <h>170</h>
     </coordinates>
     <panel_attributes>*MazeLayout*
 --
@@ -130,6 +130,10 @@ m2=*</panel_attributes>
 --
 +ball_colides_wall(bal: Ball): Boolean
 +render(): Surface
++get_start: Point
++get_end(): Point
++get_size(): Size
+
 
 
 </panel_attributes>
@@ -161,13 +165,13 @@ m2=*</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>930</x>
-      <y>390</y>
+      <y>430</y>
       <w>60</w>
-      <h>120</h>
+      <h>80</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 m2=1</panel_attributes>
-    <additional_attributes>40.0;10.0;10.0;100.0</additional_attributes>
+    <additional_attributes>40.0;10.0;10.0;60.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
@@ -234,28 +238,16 @@ resets when dead/won)
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1220</x>
-      <y>500</y>
-      <w>70</w>
-      <h>70</h>
+      <x>300</x>
+      <y>300</y>
+      <w>150</w>
+      <h>60</h>
     </coordinates>
-    <panel_attributes>*Point*
+    <panel_attributes>&lt;&lt;Convention&gt;&gt;
+*Point*
 --
-+x
-+y
+np.array of length 2
 </panel_attributes>
     <additional_attributes/>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>1240</x>
-      <y>390</y>
-      <w>40</w>
-      <h>130</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;-
-m2=2</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;110.0</additional_attributes>
   </element>
 </diagram>
