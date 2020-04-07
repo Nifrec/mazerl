@@ -23,15 +23,21 @@ class Point():
     def __init__(self, x, y):
         self.x = x
         self.y = y
+    
+    def __str__(self):
+        return f"({self.x}, {self.y})"
+
+    def __repr__(self):
+        return f"Point({self.x}, {self.y})"
 
 class Line():
     """
     Record type for a straight line in Cartesian coordinate space.
     """
 
-    def __init__(self, point1, point2):
-        self.p1 = point1
-        self.p2 = point2
+    def __init__(self, x1, y1, x2, y2):
+        self.p1 = Point(x1, y1)
+        self.p2 = Point(x2, y2)
         #self.length = math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
         # Coefficients of equation ax + by + c = 0 for this line.
         # Proof:
@@ -46,7 +52,7 @@ class Line():
         #self.c = y2*(x2 - x1) + x2*(y1 - y2)
 
     def __str__(self):
-        return f"Line ({self.x1}, {self.y1}) -> ({self.x2}, {self.y2})"
+        return f"Line ({self.p1.x}, {self.p1.y}) -> ({self.p2.x}, {self.p2.y})"
 
 class Ball():
     """
