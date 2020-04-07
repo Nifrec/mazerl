@@ -5,6 +5,7 @@ Author: Lulof Pirée
 """
 import math
 
+
 class Size():
     """
     Record type for width & height of rectangular coordinate planes.
@@ -28,11 +29,9 @@ class Line():
     Record type for a straight line in Cartesian coordinate space.
     """
 
-    def __init__(self, x1, y1, x2, y2):
-        self.x1 = x1
-        self.y1 = y1
-        self.x2 = x2
-        self.y2 = y2
+    def __init__(self, point1, point2):
+        self.p1 = point1
+        self.p2 = point2
         #self.length = math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
         # Coefficients of equation ax + by + c = 0 for this line.
         # Proof:
@@ -42,9 +41,9 @@ class Line():
         # --> lambda = (x - x2)/(x1-x2)
         # --> y = y2 + (y1-y2)*lambda = y2 + (y1-y2)(x - x2)/(x1-x2)
         # --> y(x1 - x2) + x(y2 - y1) + y2(x2 - x1) +x2(y1 - y2) = 0
-        self.a = x1 - x2
-        self.b = y2 - y1
-        self.c = y2*(x2 - x1) + x2*(y1 - y2)
+        #self.a = y2 - y1
+        #self.b = x1 - x2
+        #self.c = y2*(x2 - x1) + x2*(y1 - y2)
 
     def __str__(self):
         return f"Line ({self.x1}, {self.y1}) -> ({self.x2}, {self.y2})"
@@ -57,6 +56,7 @@ class Ball():
     def __init__(self, x, y, rad, x_vel=0, y_vel=0, x_acc=0, y_acc=0):
         self.x = x
         self.y = y
+        self.rad = rad
         self.x_vel = x_vel
         self.y_vel = y_vel
         self.x_acc = x_acc
@@ -72,7 +72,29 @@ class MazeLayout():
         assert(isinstance(ball, Ball))
 
         for line in self.lines:
-            pass
+            if (self.__collides(ball, line)):
+                return True
+        return False
 
     def __collides(self, ball, line):
-        pass
+        """
+        Checks if a given ball collides with a given line.
+        Note that just hitting without overlapping counts as hitting.
+        Also note that lines have a finite length here.
+        """
+        # First check if the distance of the center of the ball to the line
+        # is smaller than the radius of the ball.
+        # Proof: https://brilliant.org/wiki/dot-product-distance-between-point-and-a-line/
+        distance = abs(line.a * ball.x + line.b * ball.y + line.c ) \
+                / math.sqrt(line.a**2 + line.b**2)
+        if (((line.x1 < ball.x) == (line.x2 < ball.x)) and
+                ((line.y1 < ball.y) == (line.y2 < ball.y))):
+                return False
+        
+        if (distance <= ball.rad):
+            return True
+        return False
+
+
+        # 
+
