@@ -7,12 +7,6 @@ import math
 import numpy as np
 from numpy import linalg as LA
 
-def dot(p1, p2):
-    """
-    Returns dot product of two points.
-    """
-    return p1.x*p2.x + p1.y*p2.y
-
 class Size():
     """
     Record type for width & height of rectangular coordinate planes.
@@ -22,35 +16,20 @@ class Size():
         self.x = x
         self.y = y
 
-class Point():
-    """
-    Record type for a point in a Cartesian plane.
-    """
-
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-    
-    def __str__(self):
-        return f"({self.x}, {self.y})"
-
-    def __repr__(self):
-        return f"Point({self.x}, {self.y})"
-
 class Line():
     """
     Record type for a straight line in Cartesian coordinate space.
     """
 
     def __init__(self, x1, y1, x2, y2):
-        self.p1 = np.array([x1, y1])
-        self.p2 = np.array([x2, y2])
+        self.p0 = np.array([x1, y1])
+        self.p1 = np.array([x2, y2])
         #self.length = math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
         # Coefficients of equation ax + by + c = 0 for this line.
         
 
     def __str__(self):
-        return f"Line ({self.p1.x}, {self.p1.y}) -> ({self.p2.x}, {self.p2.y})"
+        return f"Line ({self.p0}, {self.p1})"
 
 class Ball():
     """
@@ -107,10 +86,10 @@ def get_line_implicit_coefs(line):
     # --> lambda = (x - x2)/(x1-x2)
     # --> y = y2 + (y1-y2)*lambda = y2 + (y1-y2)(x - x2)/(x1-x2)
     # --> y(x1 - x2) + x(y2 - y1) + y2(x2 - x1) +x2(y1 - y2) = 0
-    x1 = line.p1[0]
-    y1 = line.p1[1]
-    x2 = line.p2[0]
-    y2 = line.p2[1]
+    x1 = line.p0[0]
+    y1 = line.p0[1]
+    x2 = line.p1[0]
+    y2 = line.p1[1]
     
     a = y2 - y1
     b = x1 - x2
@@ -124,24 +103,24 @@ def dist_point_segment_line(point, line):
     treating the Line as a finite line segment.
     """
     # Derivation: http://geomalgorithms.com/a02-_lines.html 
-    v = line.p2 - line.p1
-    w = point - line.p1
+    v = line.p1 - line.p0
+    w = point - line.p0
 
-    # Check if point beyond p1-end of line
+    # Check if point beyond p0-end of line
     c = np.dot(v, w)
     if (c <= 0):
-        return euclidean_dist(point, line.p1)
-    # Check if point beyond p2-end of line
+        return euclidean_dist(point, line.p0)
+    # Check if point beyond p1-end of line
     elif (np.dot(v, v) <= c):
-        return euclidean_dist(point, line.p2)
+        return euclidean_dist(point, line.p1)
     # Then return the distance to the (inf) line itself.
     return dist_point_inf_line(point, line)
 
-def euclidean_dist(p1, p2):
+def euclidean_dist(p0, p1):
     """
     Returns Euclidean distance between two points.
     """
-    return LA.norm(p1 - p2)
+    return LA.norm(p0 - p1)
 
 def dist_point_inf_line(point, line):
     """
