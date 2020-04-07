@@ -45,10 +45,27 @@ class Ball():
         self.y_acc = y_acc
 
 class MazeLayout():
+        """
+        Class representing a maze room: defines the walls,
+        the starting position and the end position (the 'exit').
+        """
 
-    def __init__(self, lines=set()):
+    def __init__(self, lines=set(), start_point, end_point, size):
+        """
+        Arguments:
+        * lines: set of Line objects, walls of the maze.
+        * start_point: [x, y] array, starting coordinates of player in maze.
+        * end_point: [x, y] array, exit coordinates of maze (i.e. the player's
+                goal)
+        """
         assert(isinstance(lines, set))
-        self.lines = lines
+        self.__lines = lines
+        assert(len(start_point) == 2)
+        self.__start = start_point
+        assert(len(end_point) == 2)
+        self.__end = end_point
+        assert(isinstance(size, Size))
+        self.__size = size
 
     def get_ball_hits_wall(self, ball):
         assert(isinstance(ball, Ball))
@@ -70,6 +87,15 @@ class MazeLayout():
             return True
         else:
             return False
+
+    def get_start():
+        return self.__start
+    
+    def get_end():
+        return self.__end
+
+    def get_size():
+        return self.__size
 
 
 def get_line_implicit_coefs(line):
