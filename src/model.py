@@ -67,6 +67,23 @@ class MazeLayout():
         assert(isinstance(size, Size))
         self.__size = size
 
+    def __check_valid_lines():
+        """
+        Checks if all the line endpoints are within the Size
+        of this MazeLayout.
+        Returns:
+        * Boolean: True if all lines in the rectange defined by (0, 0)
+                and self.__size.
+        """
+        assert False: "TODO: test this"
+        line_is_valid
+        for line in self.__lines:
+            for point in (line.p0, line.p1):
+                if (point[0] < 0) or (point[1] < 0) \
+                    or (point[0] > self.size.x) or (point[0] > self.size.y):
+                    return False
+        return True
+
     def get_ball_hits_wall(self, ball):
         assert(isinstance(ball, Ball))
 
