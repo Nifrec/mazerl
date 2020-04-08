@@ -5,6 +5,7 @@ Author: Lulof Pirée
 """
 import math
 import numpy as np
+from numbers import Number
 from numpy import linalg as LA
 
 class Size():
@@ -15,6 +16,9 @@ class Size():
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+    def copy(self):
+        return Size(self.x, self.y)
 
 class Line():
     """
@@ -37,7 +41,7 @@ class Ball():
     velocity (in 2 dimensions) and acceleration (in 2 dimensions).
     """
     def __init__(self, x, y, rad, x_vel=0, y_vel=0, x_acc=0, y_acc=0):
-        self.p = np.array([x, y])
+        self.pos = np.array([x, y])
         self.rad = rad
         self.vel = np.array([x_vel, y_vel])
         self.acc = np.array([x_acc, y_acc])
@@ -113,26 +117,48 @@ class MazeLayout():
             return False
 
     def get_start(self):
-        return self.__start
+        return self.__start.copy()
     
     def get_end(self):
-        return self.__end
+        return self.__end.copy()
 
     def get_size(self):
-        return self.__size
+        return self.__size.copy()
 
 class Model():
 
-    def __init__(self, size: Size, ball_size: Size):
+    def __init__(self, size: Size, ball_rad: Number):
+        assert(isinstance(size, Size))
         self.__size = size
-        self.__ball_size = ball_size
-        self.__ball = Ball(0, 0, self.__ball_size)
+        self.__ball_rad = ball_rad
+        self.__ball = Ball(0, 0, self.__ball_rad)
+        self.__layout = None
 
     def set_acceleration(self, x_acc, y_acc):
-        pass
+        self.__ball.acc = np.array([x_acc, y_acc])
 
-    def reset(self, new_layout):
-        pass
+    def reset(self, new_layout = None):
+        """
+        Resets the ball position to the start of the current
+        MazeLayout. Moreover, changes the layout if a new
+        layout is supplied. The first time reset() is called,
+        a new layout must always be supplied.
+        Arguments:
+            * new_layout: MazeLayout, new room of maze to load.
+            If None, the old layout will re resued (or an error
+            thrown if no layout exists)
+        """
+        if (new_layout is None) and (self.__layout is None):
+            raise RuntimeError(self.__class__.__name__ 
+                + "reset(): no new_layout given and cannot reuse "
+                + "non-existing layout")
+        if new_layout is not None:
+            assert(isinstance(new_layout, MazeLayout))
+            self.__layout = new_layout
+
+        self.__ball.acc = np.array([0, 0])
+        self.__ball.vel = np.array([0, 0])
+        self.__ball.pos = self.__layout.get_start()
 
     def does_ball_hit_wall(self):
         pass
@@ -141,10 +167,11 @@ class Model():
         pass
 
     def get_ball_position(self):
-        pass
+        return self.__ball.pos.copy()
 
     def make_timestep(self):
-        pass
+        self.__ball.vel += self.__ball.acc
+        self.__ball.pos += self.__ball.vel
 
     def render(self):
         pass
