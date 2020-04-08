@@ -14,7 +14,7 @@ END_DUMMY = np.array([0, 0])
 class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
     
 
-    def test_get_ball_hits_wall_1(self):
+    def test_does_ball_hit_wall_1(self):
         """
         Base case: normal ball hits normal wall.
         """
@@ -22,9 +22,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(0, 0, 2.5)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == True)
+        assert (layout.does_ball_hit_wall(ball) == True)
 
-    def test_get_ball_hits_wall_2(self):
+    def test_does_ball_hit_wall_2(self):
         """
         Base case: normal ball does not hit a wall.
         """
@@ -32,9 +32,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(0, 0, 1)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == False)
+        assert (layout.does_ball_hit_wall(ball) == False)
 
-    def test_get_ball_hits_wall_3(self):
+    def test_does_ball_hit_wall_3(self):
         """
         Corner case: normal ball just hits a wall.
         """
@@ -42,9 +42,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(0, 1.5, 3)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == True)
+        assert (layout.does_ball_hit_wall(ball) == True)
 
-    def test_get_ball_hits_wall_4(self):
+    def test_does_ball_hit_wall_4(self):
         """
         Base case: 2 walls, no hit.
         """
@@ -52,9 +52,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(11, 12, 1)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == False)
+        assert (layout.does_ball_hit_wall(ball) == False)
 
-    def test_get_ball_hits_wall_5(self):
+    def test_does_ball_hit_wall_5(self):
         """
         Base case: 2 walls, one hits.
         """
@@ -62,9 +62,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(2, 1, 1)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == True)
+        assert (layout.does_ball_hit_wall(ball) == True)
 
-    def test_get_ball_hits_wall_6(self):
+    def test_does_ball_hit_wall_6(self):
         """
         Corner case: endpoints of line are far away.
         """
@@ -72,9 +72,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(5, 5, 1)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == True)
+        assert (layout.does_ball_hit_wall(ball) == True)
 
-    def test_get_ball_hits_wall_7(self):
+    def test_does_ball_hit_wall_7(self):
         """
         Corner case: Does not hit but would do so if the line were longer.
         """
@@ -82,9 +82,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(5, 5, 1)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == False)
+        assert (layout.does_ball_hit_wall(ball) == False)
 
-    def test_get_ball_hits_wall_8(self):
+    def test_does_ball_hit_wall_8(self):
         """
         Corner case: Does not hit but would do so if the line were longer v2.
         """
@@ -92,9 +92,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(10, 5, 1)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == False)
+        assert (layout.does_ball_hit_wall(ball) == False)
 
-    def test_get_ball_hits_wall_9(self):
+    def test_does_ball_hit_wall_9(self):
         """
         Corner case: Does not hit but would do so if the line were longer v3.
         """
@@ -102,9 +102,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(1, 0, 1)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == False)
+        assert (layout.does_ball_hit_wall(ball) == False)
 
-    def test_get_ball_hits_wall_10(self):
+    def test_does_ball_hit_wall_10(self):
         """
         Corner case: Does not hit but would do so if the line were longer v4.
         """
@@ -112,9 +112,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(11, 15, 2)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == False)
+        assert (layout.does_ball_hit_wall(ball) == False)
 
-    def test_get_ball_hits_wall_11(self):
+    def test_does_ball_hit_wall_11(self):
         """
         Corner case: Hits, both points of line left of ball center.
         """
@@ -122,9 +122,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(101, 100, 3)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == True)
+        assert (layout.does_ball_hit_wall(ball) == True)
 
-    def test_get_ball_hits_wall_12(self):
+    def test_does_ball_hit_wall_12(self):
         """
         Corner case: Hits, both points of line right of ball center.
         """
@@ -132,9 +132,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(99, 100, 3)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == True)
+        assert (layout.does_ball_hit_wall(ball) == True)
 
-    def test_get_ball_hits_wall_13(self):
+    def test_does_ball_hit_wall_13(self):
         """
         Corner case: coordinates line points all smaller than
         ball coordinate values (of respective dims).
@@ -143,9 +143,9 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(3, 3, 5.5)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == True)
+        assert (layout.does_ball_hit_wall(ball) == True)
 
-    def test_get_ball_hits_wall_14(self):
+    def test_does_ball_hit_wall_14(self):
         """
         Corner case: Does not hit but would do so if the line were longer v5:
         One point bigger y and one point smaller y than ball.
@@ -154,7 +154,7 @@ class MazeLayoutBallHitsWallTestCase(unittest.TestCase):
         ball = Ball(100, 100, 4)
         layout = MazeLayout(lines, START_DUMMY, END_DUMMY, SIZE_DUMMY)
 
-        assert (layout.get_ball_hits_wall(ball) == False)
+        assert (layout.does_ball_hit_wall(ball) == False)
 
 class MazeLayoutValidLinesTestCase(unittest.TestCase):
 

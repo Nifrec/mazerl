@@ -7,34 +7,6 @@ import math
 import numpy as np
 from numpy import linalg as LA
 
-class Model():
-
-    def __init__(self, size: Size, ball_size: Size):
-        self.__size = size
-        self.__ball_size = ball_size
-        self.__ball = Ball(0, 0, self.__ball_size)
-
-    def set_acceleration(self, x_acc, y_acc):
-        pass
-
-    def reset(self, new_layout):
-        pass
-
-    def get_ball_collides(self):
-        pass
-
-    def __get_ball_hits_boundary(self):
-        pass
-
-    def get_ball_position(self):
-        pass
-
-    def make_timestep(self):
-        pass
-
-    def render(self):
-        pass
-
 class Size():
     """
     Record type for width & height of rectangular coordinate planes.
@@ -119,7 +91,7 @@ class MazeLayout():
             raise ValueError("Invalid input line set.")
 
 
-    def get_ball_hits_wall(self, ball):
+    def does_ball_hit_wall(self, ball):
         assert(isinstance(ball, Ball))
 
         for line in self.__lines:
@@ -148,6 +120,34 @@ class MazeLayout():
 
     def get_size(self):
         return self.__size
+
+class Model():
+
+    def __init__(self, size: Size, ball_size: Size):
+        self.__size = size
+        self.__ball_size = ball_size
+        self.__ball = Ball(0, 0, self.__ball_size)
+
+    def set_acceleration(self, x_acc, y_acc):
+        pass
+
+    def reset(self, new_layout):
+        pass
+
+    def does_ball_hit_wall(self):
+        pass
+
+    def __does_ball_hit_boundary(self):
+        pass
+
+    def get_ball_position(self):
+        pass
+
+    def make_timestep(self):
+        pass
+
+    def render(self):
+        pass
 
 
 def get_line_implicit_coefs(line):
