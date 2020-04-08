@@ -7,11 +7,33 @@ import math
 import numpy as np
 from numpy import linalg as LA
 
-def check_validity_point(point: np.ndarray):
-    if not isinstance(point, np.ndarray):
-        raise ValueError("Invalid input point, np.ndarray expected.")
-    if (len(point) != 2):
-        raise ValueError("Invalid input point, length 2 expected.")
+class Model():
+
+    def __init__(self, size: Size, ball_size: Size):
+        self.__size = size
+        self.__ball_size = ball_size
+        self.__ball = Ball(0, 0, self.__ball_size)
+
+    def set_acceleration(x_acc, y_acc):
+        pass
+
+    def reset(self, new_layout):
+        pass
+
+    def get_ball_collides():
+        pass
+
+    def __get_ball_hits_boundary():
+        pass
+
+    def get_ball_position():
+        pass
+
+    def make_timestep():
+        pass
+
+    def render():
+        pass
 
 class Size():
     """
@@ -45,10 +67,8 @@ class Ball():
     def __init__(self, x, y, rad, x_vel=0, y_vel=0, x_acc=0, y_acc=0):
         self.p = np.array([x, y])
         self.rad = rad
-        self.x_vel = x_vel
-        self.y_vel = y_vel
-        self.x_acc = x_acc
-        self.y_acc = y_acc
+        self.vel = np.array([x_vel, y_vel])
+        self.acc = np.array([x_acc, y_acc])
 
 class MazeLayout():
     """
@@ -89,9 +109,9 @@ class MazeLayout():
         for line in lines:
             assert(isinstance(line, Line))
             for point in (line.p0, line.p1):
-                self.__check_validity_point(point)
+                self.__check_validity_line_point(point)
 
-    def __check_validity_point(self, point):
+    def __check_validity_line_point(self, point):
         if (point[0] < 0) \
                 or (point[1] < 0) \
                 or (point[0] >= self.__size.x) \
@@ -120,13 +140,13 @@ class MazeLayout():
         else:
             return False
 
-    def get_start():
+    def get_start(self):
         return self.__start
     
-    def get_end():
+    def get_end(self):
         return self.__end
 
-    def get_size():
+    def get_size(self):
         return self.__size
 
 
@@ -190,3 +210,9 @@ def dist_point_inf_line(point, line):
     distance = abs(a * point[0] + b * point[1] + c ) \
                 / math.sqrt(a**2 + b**2)
     return distance
+
+def check_validity_point(point: np.ndarray):
+    if not isinstance(point, np.ndarray):
+        raise ValueError("Invalid input point, np.ndarray expected.")
+    if (len(point) != 2):
+        raise ValueError("Invalid input point, length 2 expected.")
