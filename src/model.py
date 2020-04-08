@@ -14,25 +14,25 @@ class Model():
         self.__ball_size = ball_size
         self.__ball = Ball(0, 0, self.__ball_size)
 
-    def set_acceleration(x_acc, y_acc):
+    def set_acceleration(self, x_acc, y_acc):
         pass
 
     def reset(self, new_layout):
         pass
 
-    def get_ball_collides():
+    def get_ball_collides(self):
         pass
 
-    def __get_ball_hits_boundary():
+    def __get_ball_hits_boundary(self):
         pass
 
-    def get_ball_position():
+    def get_ball_position(self):
         pass
 
-    def make_timestep():
+    def make_timestep(self):
         pass
 
-    def render():
+    def render(self):
         pass
 
 class Size():
