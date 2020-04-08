@@ -59,19 +59,23 @@ class MazeLayout():
         * start_point: [x, y] array, starting coordinates of player in maze.
         * end_point: [x, y] array, exit coordinates of maze (i.e. the player's
                 goal)
-        """
-        check_validity_point(start_point)
-        self.__check_validity_location_point(start_point)
-        check_validity_point(end_point)
-        self.__check_validity_location_point(end_point)
-        assert(isinstance(size, Size))
 
+        NOTE: does not check if the start or end coincides with a wall.
+                (They should definitely not.)
+        """
         self.__lines = lines
         self.__start = start_point
         self.__end = end_point
         self.__size = size
 
+        # Some of these checks use the fields initialized above.
+        assert(isinstance(size, Size))
         self.__check_validity_lines(lines)
+        check_validity_point(start_point)
+        self.__check_validity_location_point(start_point)
+        check_validity_point(end_point)
+        self.__check_validity_location_point(end_point)
+        
 
     def __check_validity_lines(self, lines):
         """
@@ -94,7 +98,8 @@ class MazeLayout():
                 or (point[1] < 0) \
                 or (point[0] >= self.__size.x) \
                 or (point[1] >= self.__size.y):
-            raise ValueError("Invalid input line set.")
+            raise ValueError(self.__class__.__name__ 
+                + ": Invalid input: data beyond layout size.")
 
 
     def does_ball_hit_wall(self, ball):
