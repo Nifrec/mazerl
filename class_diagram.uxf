@@ -7,7 +7,7 @@
       <x>380</x>
       <y>430</y>
       <w>340</w>
-      <h>200</h>
+      <h>210</h>
     </coordinates>
     <panel_attributes>*Model*
 --
@@ -97,13 +97,13 @@
     <id>Relation</id>
     <coordinates>
       <x>560</x>
-      <y>620</y>
+      <y>630</y>
       <w>40</w>
-      <h>100</h>
+      <h>90</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 m2=1</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
@@ -180,13 +180,13 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>700</x>
-      <y>620</y>
+      <y>630</y>
       <w>80</w>
-      <h>110</h>
+      <h>100</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 m2=1</panel_attributes>
-    <additional_attributes>10.0;10.0;60.0;90.0</additional_attributes>
+    <additional_attributes>10.0;10.0;60.0;80.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>

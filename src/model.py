@@ -61,7 +61,9 @@ class MazeLayout():
                 goal)
         """
         check_validity_point(start_point)
+        self.__check_validity_location_point(start_point)
         check_validity_point(end_point)
+        self.__check_validity_location_point(end_point)
         assert(isinstance(size, Size))
 
         self.__lines = lines
@@ -85,9 +87,9 @@ class MazeLayout():
         for line in lines:
             assert(isinstance(line, Line))
             for point in (line.p0, line.p1):
-                self.__check_validity_line_point(point)
+                self.__check_validity_location_point(point)
 
-    def __check_validity_line_point(self, point):
+    def __check_validity_location_point(self, point):
         if (point[0] < 0) \
                 or (point[1] < 0) \
                 or (point[0] >= self.__size.x) \
