@@ -18,6 +18,7 @@
 +set_acceleration(x_acc, y_acc)
 +reset(new_layout: MazeLayout = None)
 +does_ball_hit_wall(): Boolean
++is_at_finish(): Boolean
 -does_ball_hit_boundary(): Boolean
 +get_ball_position: Point
 +make_timestep()

@@ -160,6 +160,9 @@ class Model():
         self.__ball.vel = np.array([0, 0])
         self.__ball.pos = self.__layout.get_start()
 
+    def is_at_finish(self):
+        pass
+
     def does_ball_hit_wall(self):
         pass
 
