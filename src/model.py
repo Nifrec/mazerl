@@ -9,9 +9,9 @@ from numpy import linalg as LA
 
 def check_validity_point(point: np.ndarray):
     if not isinstance(point, np.ndarray):
-        raise ValueError("Invalid input point, np.ndarray expected."
-    if not (len(point) == 2):
-        raise ValueError("Invalid input point, length 2 expected."
+        raise ValueError("Invalid input point, np.ndarray expected.")
+    if (len(point) != 2):
+        raise ValueError("Invalid input point, length 2 expected.")
 
 class Size():
     """
@@ -51,12 +51,12 @@ class Ball():
         self.y_acc = y_acc
 
 class MazeLayout():
-        """
-        Class representing a maze room: defines the walls,
-        the starting position and the end position (the 'exit').
-        """
+    """
+    Class representing a maze room: defines the walls,
+    the starting position and the end position (the 'exit').
+    """
 
-    def __init__(self, lines=set(), start_point, end_point, size):
+    def __init__(self, lines, start_point, end_point, size):
         """
         Arguments:
         * lines: set of Line objects, walls of the maze.
@@ -64,7 +64,6 @@ class MazeLayout():
         * end_point: [x, y] array, exit coordinates of maze (i.e. the player's
                 goal)
         """
-        self.__check_validity_lines(lines)
         check_validity_point(start_point)
         check_validity_point(end_point)
         assert(isinstance(size, Size))
@@ -74,7 +73,9 @@ class MazeLayout():
         self.__end = end_point
         self.__size = size
 
-    def __check_validity_lines(lines):
+        self.__check_validity_lines(lines)
+
+    def __check_validity_lines(self, lines):
         """
         Checks if all the line endpoints are within the Size
         of this MazeLayout. Not that, because indices start at 0,
@@ -85,19 +86,23 @@ class MazeLayout():
                 and self.__size.
         """
         assert(isinstance(lines, set))
-        assert False: "TODO: test this"
-        line_is_valid
         for line in lines:
             assert(isinstance(line, Line))
             for point in (line.p0, line.p1):
-                if (point[0] < 0) or (point[1] < 0) \
-                    or (point[0] >= self.size.x) or (point[0] >= self.size.y):
-                    raise ValueError("Invalid input line set.")
+                self.__check_validity_point(point)
+
+    def __check_validity_point(self, point):
+        if (point[0] < 0) \
+                or (point[1] < 0) \
+                or (point[0] >= self.__size.x) \
+                or (point[1] >= self.__size.y):
+            raise ValueError("Invalid input line set.")
+
 
     def get_ball_hits_wall(self, ball):
         assert(isinstance(ball, Ball))
 
-        for line in self.lines:
+        for line in self.__lines:
             if (self.__collides(ball, line)):
                 return True
         return False
