@@ -4,7 +4,7 @@ File to test the auxiliary function model.is_ball_in_rect().
 Author: Lulof Pirée
 """
 from model import Ball, Size
-from model import is_ball_in_rect
+from distances import is_ball_in_rect
 import unittest
 
 class BallInRectTestCase(unittest.TestCase):

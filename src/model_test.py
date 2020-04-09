@@ -4,8 +4,7 @@ File to test the Model class of model.py
 Author: Lulof Pirée
 """
 import unittest
-from model import Model, Size, Ball, MazeLayout, Line
-from model import is_ball_in_rect
+import model
 import numpy as np
 
 class ModelMovementTestCase(unittest.TestCase):
@@ -14,12 +13,12 @@ class ModelMovementTestCase(unittest.TestCase):
     """
 
     def setUp(self):
-        self.size = Size(10000, 10000)
+        self.size = model.Size(10000, 10000)
         self.ball_rad = 1
         self.start = np.array([50, 50])
-        self.layout = MazeLayout(set([]), self.start, 
+        self.layout = model.MazeLayout(set([]), self.start, 
                 np.array([99, 99]), self.size)
-        self.model = Model(self.size, self.ball_rad)
+        self.model = model.Model(self.size, self.ball_rad)
         self.model.reset(self.layout)
 
     def compare_pos(self, expected, result):
@@ -119,15 +118,15 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
     """
 
     def setUp(self):
-        self.size = Size(10, 10)
+        self.size = model.Size(10, 10)
         self.ball_rad = 1
-        self.model = Model(self.size, self.ball_rad)
+        self.model = model.Model(self.size, self.ball_rad)
 
     def test_collision_boundary_1(self):
         """
         Sanity check: No wall hit.
         """
-        layout = MazeLayout(set([]), np.array([2, 2]),
+        layout = model.MazeLayout(set([]), np.array([2, 2]),
                 np.array([9, 9]), self.size)
         self.model.reset(layout)
 
@@ -137,7 +136,7 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         """
         Base case: left boundary.
         """
-        layout = MazeLayout(set([]), np.array([2, 2]),
+        layout = model.MazeLayout(set([]), np.array([2, 2]),
                 np.array([9, 9]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(-1, 0)
@@ -150,7 +149,7 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         """
         Base case: top boundary.
         """
-        layout = MazeLayout(set([]), np.array([2, 2]),
+        layout = model.MazeLayout(set([]), np.array([2, 2]),
                 np.array([9, 9]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(0, -1)
@@ -163,8 +162,8 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         """
         Base case: right boundary.
         """
-        layout = MazeLayout(set([]), np.array([8, 8]),
-                np.array([9, 9]), Size(10, 10))
+        layout = model.MazeLayout(set([]), np.array([8, 8]),
+                np.array([9, 9]), model.Size(10, 10))
         self.model.reset(layout)
         self.model.set_acceleration(1, 0)
         # New pos ball becomes (9, 8), and with rad=1 it will touch the border.
@@ -176,8 +175,8 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         """
         Base case: bottom boundary.
         """
-        layout = MazeLayout(set([]), np.array([8, 8]),
-                np.array([9, 9]), Size(10, 10))
+        layout = model.MazeLayout(set([]), np.array([8, 8]),
+                np.array([9, 9]), model.Size(10, 10))
         self.model.reset(layout)
         self.model.set_acceleration(0, 1)
         # New pos ball becomes (8, 9), and with rad=1 it will touch the border.
@@ -189,8 +188,8 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         """
         Corner case: completely off room boundary.
         """
-        layout = MazeLayout(set([]), np.array([8, 8]),
-                np.array([9, 9]), Size(10, 10))
+        layout = model.MazeLayout(set([]), np.array([8, 8]),
+                np.array([9, 9]), model.Size(10, 10))
         self.model.reset(layout)
         self.model.set_acceleration(100, 100) 
         # Will instantaneously fly from screen.
@@ -202,7 +201,7 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         """
         Corner case (literally): diagonal movement (hit two at same time).
         """
-        layout = MazeLayout(set([]), np.array([2, 2]),
+        layout = model.MazeLayout(set([]), np.array([2, 2]),
                 np.array([9, 9]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(-1, -1)
@@ -217,17 +216,17 @@ class ModelWallCollisionTestCase(unittest.TestCase):
     """
 
     def setUp(self):
-        self.size = Size(100, 100)
+        self.size = model.Size(100, 100)
         self.ball_rad = 1
-        self.model = Model(self.size, self.ball_rad)
+        self.model = model.Model(self.size, self.ball_rad)
 
     def test_collision_wall_1(self):
         """
         Sanity check: No wall hit, minimal distance.
         """
-        wall1 = Line(4, 0, 4, 99)
-        wall2 = Line(0, 4, 99, 4)
-        layout = MazeLayout(set([wall1, wall2]), np.array([2, 2]),
+        wall1 = model.Line(4, 0, 4, 99)
+        wall2 = model.Line(0, 4, 99, 4)
+        layout = model.MazeLayout(set([wall1, wall2]), np.array([2, 2]),
                 np.array([99, 99]), self.size)
         self.model.reset(layout)
         assert (self.model.does_ball_hit_wall() == False)
@@ -236,8 +235,8 @@ class ModelWallCollisionTestCase(unittest.TestCase):
         """
         Base case: hit right.
         """
-        wall = Line(4, 0, 4, 99)
-        layout = MazeLayout(set([wall]), np.array([2, 2]),
+        wall = model.Line(4, 0, 4, 99)
+        layout = model.MazeLayout(set([wall]), np.array([2, 2]),
                 np.array([99, 99]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(1, 0)
@@ -250,8 +249,8 @@ class ModelWallCollisionTestCase(unittest.TestCase):
         """
         Base case: hit below.
         """
-        wall = Line(0, 4, 99, 4)
-        layout = MazeLayout(set([wall]), np.array([2, 2]),
+        wall = model.Line(0, 4, 99, 4)
+        layout = model.MazeLayout(set([wall]), np.array([2, 2]),
                 np.array([99, 99]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(0, 1)
@@ -264,9 +263,9 @@ class ModelWallCollisionTestCase(unittest.TestCase):
         """
         Corner case: hit two walls at once.
         """
-        wall1 = Line(4, 0, 4, 99)
-        wall2 = Line(0, 4, 99, 4)
-        layout = MazeLayout(set([wall1, wall2]), np.array([2, 2]),
+        wall1 = model.Line(4, 0, 4, 99)
+        wall2 = model.Line(0, 4, 99, 4)
+        layout = model.MazeLayout(set([wall1, wall2]), np.array([2, 2]),
                 np.array([99, 99]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(1, 1)
@@ -280,8 +279,8 @@ class ModelWallCollisionTestCase(unittest.TestCase):
         """
         Base case: hit below, without movement.
         """
-        wall = Line(0, 4, 99, 4)
-        layout = MazeLayout(set([wall]), np.array([2, 3]),
+        wall = model.Line(0, 4, 99, 4)
+        layout = model.MazeLayout(set([wall]), np.array([2, 3]),
                 np.array([99, 99]), self.size)
         self.model.reset(layout)
         # With pos (2, 3) and with rad=1 the ball will be touching the wall.
@@ -294,15 +293,15 @@ class ModelFinishCollisionTestCase(unittest.TestCase):
     """
 
     def setUp(self):
-        self.size = Size(100, 100)
+        self.size = model.Size(100, 100)
         self.ball_rad = 1
-        self.model = Model(self.size, self.ball_rad)
+        self.model = model.Model(self.size, self.ball_rad)
 
     def test_collision_end_1(self):
         """
         Sanity check: not at end
         """
-        layout = MazeLayout(set([]), np.array([2, 2]),
+        layout = model.MazeLayout(set([]), np.array([2, 2]),
                 np.array([99, 99]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(1, 1)
@@ -315,7 +314,7 @@ class ModelFinishCollisionTestCase(unittest.TestCase):
         """
         Base case: ball reaches end
         """
-        layout = MazeLayout(set([]), np.array([2, 2]),
+        layout = model.MazeLayout(set([]), np.array([2, 2]),
                 np.array([7, 2]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(2, 0)
