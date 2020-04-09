@@ -248,6 +248,20 @@ def dist_point_inf_line(point, line):
                 / math.sqrt(a**2 + b**2)
     return distance
 
+def is_ball_in_rect(ball: Ball, size: Size) -> bool:
+    """
+    Returns whether the given ball is located in the rectangle from
+    (0, 0) to (size.x, size.y) (and not touching any border of the rectangle).
+    """
+    # Check left and top edge.
+    if (ball.pos[0] - ball.rad <= 0) or (ball.pos[1] - ball.rad <= 0):
+        return False
+    # Check right and bottom edge.
+    if (ball.pos[0] + ball.rad >= size.x) or (ball.pos[1] + ball.rad >= size.y):
+        return False
+    else:
+        return True
+
 def check_validity_point(point: np.ndarray):
     if not isinstance(point, np.ndarray):
         raise ValueError("Invalid input point, np.ndarray expected.")
