@@ -93,7 +93,7 @@ class MazeLayout():
             for point in (line.p0, line.p1):
                 self.__check_validity_location_point(point)
 
-    def __check_validity_location_point(self, point):
+    def __check_validity_location_point(self, point: np.ndarray):
         if (point[0] < 0) \
                 or (point[1] < 0) \
                 or (point[0] >= self.__size.x) \
@@ -101,6 +101,8 @@ class MazeLayout():
             raise ValueError(self.__class__.__name__ 
                 + ": Invalid input: data beyond layout size.")
 
+    def is_ball_at_finish(self, ball: Ball):
+        return (euclidean_dist(self.__end, ball.pos) <= ball.rad)
 
     def does_ball_hit_wall(self, ball):
         assert(isinstance(ball, Ball))
@@ -110,13 +112,13 @@ class MazeLayout():
                 return True
         return False
 
-    def __collides(self, ball, line):
+    def __collides(self, ball: Ball, line: Line):
         """
         Checks if a given ball collides with a given line.
         Note that just hitting without overlapping counts as hitting.
         Also note that lines have a finite length here.
         """
-        distance = dist_point_segment_line(ball.p, line)
+        distance = dist_point_segment_line(ball.pos, line)
         
         if (distance <= ball.rad):
             return True
@@ -141,7 +143,7 @@ class Model():
         self.__ball = Ball(0, 0, self.__ball_rad)
         self.__layout = None
 
-    def set_acceleration(self, x_acc, y_acc):
+    def set_acceleration(self, x_acc: Number, y_acc: Number):
         self.__ball.acc = np.array([x_acc, y_acc])
 
     def reset(self, new_layout = None):
@@ -155,10 +157,7 @@ class Model():
             If None, the old layout will re resued (or an error
             thrown if no layout exists)
         """
-        if (new_layout is None) and (self.__layout is None):
-            raise RuntimeError(self.__class__.__name__ 
-                + "reset(): no new_layout given and cannot reuse "
-                + "non-existing layout")
+        self.__check_valid_new_layout(new_layout)
         if new_layout is not None:
             assert(isinstance(new_layout, MazeLayout))
             self.__layout = new_layout
@@ -167,14 +166,29 @@ class Model():
         self.__ball.vel = np.array([0, 0])
         self.__ball.pos = self.__layout.get_start()
 
-    def is_at_finish(self):
-        pass
+    def __check_valid_new_layout(self, new_layout: MazeLayout):
+        if (new_layout is None) and (self.__layout is None):
+            raise RuntimeError(self.__class__.__name__ 
+                + "reset(): no new_layout given and cannot reuse "
+                + "non-existing layout")
+
+        new_layout_size = new_layout.get_size()
+        if (new_layout_size.x != self.__size.x) or \
+                (new_layout_size.y != self.__size.y):
+                raise ValueError(self.__class__.__name__
+                        + f"reset(): new_layout has wrong size, {self.__size}"
+                        + "expected")
+
+    def is_ball_at_finish(self):
+        return self.__layout.is_ball_at_finish(self.__ball)
 
     def does_ball_hit_wall(self):
-        pass
+        output = self.__layout.does_ball_hit_wall(self.__ball)
+        output = output or self.__does_ball_hit_boundary()
+        return output
 
     def __does_ball_hit_boundary(self):
-        pass
+        return (is_ball_in_rect(self.__ball, self.__size) == False)
 
     def get_ball_position(self):
         return self.__ball.pos.copy()

@@ -119,7 +119,7 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
     """
 
     def setUp(self):
-        self.size = Size(100, 100)
+        self.size = Size(10, 10)
         self.ball_rad = 1
         self.model = Model(self.size, self.ball_rad)
 
@@ -128,7 +128,7 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         Sanity check: No wall hit.
         """
         layout = MazeLayout(set([]), np.array([2, 2]),
-                np.array([99, 99]), self.size)
+                np.array([9, 9]), self.size)
         self.model.reset(layout)
 
         assert (self.model.does_ball_hit_wall() == False)
@@ -138,7 +138,7 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         Base case: left boundary.
         """
         layout = MazeLayout(set([]), np.array([2, 2]),
-                np.array([99, 99]), self.size)
+                np.array([9, 9]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(-1, 0)
         # New pos ball becomes (1, 2), and with rad=1 it will touch the border.
@@ -151,7 +151,7 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         Base case: top boundary.
         """
         layout = MazeLayout(set([]), np.array([2, 2]),
-                np.array([99, 99]), self.size)
+                np.array([9, 9]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(0, -1)
         # New pos ball becomes (2, 1), and with rad=1 it will touch the border.
@@ -164,7 +164,7 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         Base case: right boundary.
         """
         layout = MazeLayout(set([]), np.array([8, 8]),
-                np.array([99, 99]), np.array([10, 10]))
+                np.array([9, 9]), Size(10, 10))
         self.model.reset(layout)
         self.model.set_acceleration(1, 0)
         # New pos ball becomes (9, 8), and with rad=1 it will touch the border.
@@ -177,7 +177,7 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         Base case: bottom boundary.
         """
         layout = MazeLayout(set([]), np.array([8, 8]),
-                np.array([99, 99]), np.array([10, 10]))
+                np.array([9, 9]), Size(10, 10))
         self.model.reset(layout)
         self.model.set_acceleration(0, 1)
         # New pos ball becomes (8, 9), and with rad=1 it will touch the border.
@@ -190,7 +190,7 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         Corner case: completely off room boundary.
         """
         layout = MazeLayout(set([]), np.array([8, 8]),
-                np.array([99, 99]), np.array([10, 10]))
+                np.array([9, 9]), Size(10, 10))
         self.model.reset(layout)
         self.model.set_acceleration(100, 100) 
         # Will instantaneously fly from screen.
@@ -203,7 +203,7 @@ class ModelBoundaryCollisionTestCase(unittest.TestCase):
         Corner case (literally): diagonal movement (hit two at same time).
         """
         layout = MazeLayout(set([]), np.array([2, 2]),
-                np.array([99, 99]), self.size)
+                np.array([9, 9]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(-1, -1)
         # New pos ball becomes (1, 1), and with rad=1 it will touch the border.
@@ -230,7 +230,6 @@ class ModelWallCollisionTestCase(unittest.TestCase):
         layout = MazeLayout(set([wall1, wall2]), np.array([2, 2]),
                 np.array([99, 99]), self.size)
         self.model.reset(layout)
-
         assert (self.model.does_ball_hit_wall() == False)
 
     def test_collision_wall_2(self):
@@ -251,8 +250,8 @@ class ModelWallCollisionTestCase(unittest.TestCase):
         """
         Base case: hit below.
         """
-        wall2 = Line(0, 4, 99, 4)
-        layout = MazeLayout(set([]), np.array([2, 2]),
+        wall = Line(0, 4, 99, 4)
+        layout = MazeLayout(set([wall]), np.array([2, 2]),
                 np.array([99, 99]), self.size)
         self.model.reset(layout)
         self.model.set_acceleration(0, 1)
@@ -274,6 +273,18 @@ class ModelWallCollisionTestCase(unittest.TestCase):
         # New pos ball becomes (3, 3), and with rad=1 it will touch the walls.
         self.model.make_timestep()
 
+
+        assert (self.model.does_ball_hit_wall() == True)
+
+    def test_collision_wall_5(self):
+        """
+        Base case: hit below, without movement.
+        """
+        wall = Line(0, 4, 99, 4)
+        layout = MazeLayout(set([wall]), np.array([2, 3]),
+                np.array([99, 99]), self.size)
+        self.model.reset(layout)
+        # With pos (2, 3) and with rad=1 the ball will be touching the wall.
 
         assert (self.model.does_ball_hit_wall() == True)
 
