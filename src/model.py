@@ -7,6 +7,13 @@ import math
 import numpy as np
 from numbers import Number
 from numpy import linalg as LA
+import enum
+
+class Orientation(enum.Enum):
+    CLOCKWISE = 1
+    COUNTERCLOCKWISE = 2
+    COLLINEAR = 3
+
 
 class Size():
     """
@@ -22,7 +29,8 @@ class Size():
 
 class Line():
     """
-    Record type for a straight line in Cartesian coordinate space.
+    Record type for a (finite) straight line segment 
+    in Cartesian coordinate space.
     """
 
     def __init__(self, x1, y1, x2, y2):
@@ -226,9 +234,98 @@ def get_line_implicit_coefs(line):
 
     return a, b, c
 
-def dist_point_segment_line(point, line):
+def dist_line_segment_line_segment(line_0: Line, line_1: Line) -> Number:
     """
-    Get the distance of a Point to a Line,
+    Computes the shortest distance between two line segments.
+    """
+    # 2 cases: the lines intersect -> dist = 0.
+    # or they do not, and the dist is dist(endpoint_one_line, other_line).
+    # In the latter scenario there are only 4 combinations to check.
+    if (do_lines_intersect(line_0, line_1)):
+        return 0
+    else:
+        assert False, "TODO"
+
+
+def do_lines_intersect(line_0: Line, line_1: Line) -> bool:
+    """
+    Returns whether two finite line segments intersect.
+    """
+    # Theory:
+    # https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
+    # https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
+    
+    # Compute orientations of all triangles created by taking one line
+    # and one endpoint of the other line.
+    # For lines AB and XY, that are O(A, B, X), O(A, B, Y),
+    # O(X, Y, A), O(X, Y, B) (where O is the orientation)
+    orient_0 = compute_orientation_points(line_0.p0, line_0.p1, line_1.p0)
+    orient_1 = compute_orientation_points(line_0.p0, line_0.p1, line_1.p1)
+    orient_2 = compute_orientation_points(line_1.p0, line_1.p1, line_0.p0)
+    orient_3 = compute_orientation_points(line_1.p0, line_1.p1, line_0.p1)
+
+    # If the lines intersect, the triangle above the interseaction has
+    # a reverse orientation as the triangle below, for both pairs of triagles.
+    # (if only for one pair, then they do not need to intersect)
+    if (orient_0 != orient_1) and (orient_2 != orient_3):
+        return True
+
+    # Now they may still intersect if they are both collinear and overlap.
+    elif (orient_0 == Orientation.COLLINEAR) \
+            and (orient_1 == Orientation.COLLINEAR) \
+            and (orient_2 == Orientation.COLLINEAR) \
+            and (orient_3 == Orientation.COLLINEAR):
+        return do_collinear_lines_intersect(line_0, line_1)
+    
+    else:
+        return False
+
+def compute_orientation_points(p0: np.ndarray, p1: np.ndarray, p2: np.ndarray) 
+        -> Orientation:
+    """
+    Returns whether three points are aligned in clockwise order.
+
+    Returns:
+        * Orientation: whether p0, p1, p2 are aligned clockwise,
+            counterclockwise or collinear (i.e. aligned in a straight line).
+    """
+    # Theory:
+    # https://www.geeksforgeeks.org/orientation-3-ordered-points/amp/%c2%a0/
+    slope_p0_p1 = compute_slope_two_points(p0, p1)
+    slope_p1_p2 = compute_slope_two_points(p1, p2)
+
+    if math.isclose(slope_p0_p1 == slope_p1_p2):
+        return Orientation.COLLINEAR
+    elif (slope_p0_p1 > slope_p1_p2):
+        # A right turn is made from slope_p0_p1 to slope_p1_p2
+        return Orientation.CLOCKWISE
+    else:
+        return Orientation.COUNTERCLOCKWISE
+
+def compute_slope_two_points(p0: np.ndarray, p1: np.ndarray) -> Number:
+    # Slope = Dy / Dx
+    return (p1[1]-p0[1]) / (p1[0] - p0[0])
+
+def do_collinear_lines_intersect(line_0: Line, line_1: Line) -> bool:
+    # Check if x-projections and y-projections intersect.
+    if do_intervals_intersect(line_0.p0[0], line_0.p1[0], line_1.p0[0], 
+            line_1.p1[0]) \
+        and do_intervals_intersect(line_0.p0[1], line_0.p1[1], line_1.p0[1], 
+                line_1.p1[1]):
+            return True
+    else:
+        return False
+
+def do_intervals_intersect(a0:Number, a1:Number, b0:Number, b1:Number)-> bool:
+    """
+    Returns whether two 1-dimensional intervals [a0, a1] and [b0, b1]
+    intersect.
+    """
+    return ((a0 <= b0) and (a1 >= b0)) or ((a0 <= b1) and (a1 >= b1))
+
+def dist_point_segment_line(point: np.ndarray, line: Line):
+    """
+    Get the (shortest) distance of a Point to a Line,
     treating the Line as a finite line segment.
     """
     # Derivation: http://geomalgorithms.com/a02-_lines.html 
