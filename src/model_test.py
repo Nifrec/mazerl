@@ -5,6 +5,7 @@ Author: Lulof Pirée
 """
 import unittest
 from model import Model, Size, Ball, MazeLayout, Line
+from model import is_ball_in_rect
 import numpy as np
 
 class ModelMovementTestCase(unittest.TestCase):
@@ -297,7 +298,7 @@ class ModelFinishCollisionTestCase(unittest.TestCase):
         # New pos ball becomes (3, 3), still far from (99, 99).
         self.model.make_timestep()
 
-        assert (self.model.is_at_finish() == False)
+        assert (self.model.is_ball_at_finish() == False)
 
     def test_collision_end_2(self):
         """
@@ -309,11 +310,11 @@ class ModelFinishCollisionTestCase(unittest.TestCase):
         self.model.set_acceleration(2, 0)
         # New pos ball becomes (4, 2), not hit end yet.
         self.model.make_timestep()
-        assert (self.model.is_at_finish() == False)
+        assert (self.model.is_ball_at_finish() == False)
         self.model.set_acceleration(0, 0)
         # New pos ball becomes (6, 2), with rad=1 does hit it.
         self.model.make_timestep()
-        assert (self.model.is_at_finish() == True)
+        assert (self.model.is_ball_at_finish() == True)
 
 if (__name__ == "__main__"):
     unittest.main()
