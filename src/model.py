@@ -18,7 +18,8 @@ class MazeLayout():
     the starting position and the end position (the 'exit').
     """
 
-    def __init__(self, lines, start_point, end_point, size):
+    def __init__(self, lines: set, start_point: np.ndarray,
+            end_point: np.ndarray, size: Size):
         """
         Arguments:
         * lines: set of Line objects, walls of the maze.
@@ -112,7 +113,7 @@ class Model():
     def set_acceleration(self, x_acc: Number, y_acc: Number):
         self.__ball.acc = np.array([x_acc, y_acc])
 
-    def reset(self, new_layout = None):
+    def reset(self, new_layout: MazeLayout = None):
         """
         Resets the ball position to the start of the current
         MazeLayout. Moreover, changes the layout if a new
