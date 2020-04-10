@@ -10,9 +10,10 @@ Author: Lulof Pirée
 import math
 import enum
 import numpy as np
+from numpy import linalg as LA
 from numbers import Number
 # Local imports:
-import model
+from record_types import Size, Line, Ball
 
 class Orientation(enum.Enum):
     CLOCKWISE = 1
@@ -45,8 +46,8 @@ def __get_line_implicit_coefs(line):
 
     return a, b, c
 
-def dist_line_segment_line_segment(line_0: model.Line,
-        line_1: model.Line) -> Number:
+def dist_line_segment_line_segment(line_0: Line,
+        line_1: Line) -> Number:
     """
     Computes the shortest distance between two line segments.
     """
@@ -63,7 +64,7 @@ def dist_line_segment_line_segment(line_0: model.Line,
         return min(d0, d1, d2, d3)
 
 
-def __do_lines_intersect(line_0: model.Line, line_1: model.Line) -> bool:
+def __do_lines_intersect(line_0: Line, line_1: Line) -> bool:
     """
     Returns whether two finite line segments intersect.
     """
@@ -121,8 +122,8 @@ def __compute_slope_two_points(p0: np.ndarray, p1: np.ndarray) -> Number:
     # Slope = Dy / Dx
     return (p1[1]-p0[1]) / (p1[0] - p0[0])
 
-def __do_collinear_lines_intersect(line_0: model.Line, 
-        line_1: model.Line) -> bool:
+def __do_collinear_lines_intersect(line_0: Line, 
+        line_1: Line) -> bool:
     # Check if x-projections and y-projections intersect.
     if __do_intervals_intersect(line_0.p0[0], line_0.p1[0], line_1.p0[0], 
             line_1.p1[0]) \
@@ -139,7 +140,7 @@ def __do_intervals_intersect(a0:Number, a1:Number, b0:Number, b1:Number)-> bool:
     """
     return ((a0 <= b0) and (a1 >= b0)) or ((a0 <= b1) and (a1 >= b1))
 
-def dist_point_line_segment(point: np.ndarray, line: model.Line):
+def dist_point_line_segment(point: np.ndarray, line: Line):
     """
     Get the (shortest) distance of a Point to a Line,
     treating the Line as a finite line segment.
@@ -175,7 +176,7 @@ def __dist_point_inf_line(point, line):
                 / math.sqrt(a**2 + b**2)
     return distance
 
-def is_ball_in_rect(ball: model.Ball, size: model.Size) -> bool:
+def is_ball_in_rect(ball: Ball, size: Size) -> bool:
     """
     Returns whether the given ball is located in the rectangle from
     (0, 0) to (size.x, size.y) (and not touching any border of the rectangle).
