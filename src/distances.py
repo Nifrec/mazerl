@@ -46,8 +46,7 @@ def __get_line_implicit_coefs(line):
 
     return a, b, c
 
-def dist_line_segment_line_segment(line_0: Line,
-        line_1: Line) -> Number:
+def dist_line_to_line(line_0: Line, line_1: Line) -> Number:
     """
     Computes the shortest distance between two line segments.
     """
@@ -117,7 +116,6 @@ def __compute_orientation_points(line: Line, p: np.ndarray) -> Orientation:
     # and CLOCKWISE if slope_line > slope_to_point
     # -- problem -- notice the numerical instability if p1[0] == p0[0]!
     # --> Solved by simple algebraic manipulation.
-
 
     # Ensure line is read from left to right
     if (line.p0[0] <= line.p1[0]):
