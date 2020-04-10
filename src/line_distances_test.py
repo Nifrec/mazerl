@@ -6,9 +6,13 @@ Author: Lulof Pirée
 """
 import unittest
 import numpy as np
+import math
+
 from record_types import Line
-from distances import Orientation, do_lines_intersect
+from distances import Orientation
+from distances import do_lines_intersect
 from distances import __compute_orientation_points as compute_orientation_points
+from distances import dist_line_to_line
 
 class DoLinesIntersectTestCase(unittest.TestCase):
     """
@@ -155,8 +159,54 @@ class OrientationLinesTestCase(unittest.TestCase):
 
         self.assertEqual(Orientation.COUNTERCLOCKWISE, output)
 
+class DistLineToLineTestCase(unittest.TestCase):
+    """
+    Tests dist_line_to_line().
+    """
+    def test_dist_lines_1(self):
+        """
+        Base case: intersecting lines.
+        """
+        line_0 = Line(1, 1, 2, 2)
+        line_1 = Line(1, 2, 2, 1)
+        output = dist_line_to_line(line_0, line_1)
+        expected = 0.0
 
+        self.assertAlmostEqual(expected, output)
 
+    def test_dist_lines_2(self):
+        """
+        Base case: colinear lines.
+        """
+        line_0 = Line(0, 1, 1, 2)
+        line_1 = Line(0, 0, 1, 1)
+        output = dist_line_to_line(line_0, line_1)
+        expected = 0.5*math.sqrt(1**2 + 1**2)
+
+        self.assertAlmostEqual(expected, output)
+
+    def test_dist_lines_3(self):
+        """
+        Base case: colinear lines on same infinite line.
+        """
+        line_0 = Line(0, 0, 2, 2)
+        line_1 = Line(6, 6, 5, 5)
+        output = dist_line_to_line(line_0, line_1)
+        expected = math.sqrt(3**2 + 3**2)
+
+        self.assertAlmostEqual(expected, output)
+
+    def test_dist_lines_4(self):
+        """
+        Base case: shortest dist is to endpoint of one of the two.
+        """
+        # Note: line_0 not noted left-to-right. It should handle this.
+        line_0 = Line(5, 4, 2, 1) 
+        line_1 = Line(1, 6, 10, 6)
+        output = dist_line_to_line(line_0, line_1)
+        expected = 2
+
+        self.assertAlmostEqual(expected, output)
 
 if (__name__ == "__main__"):
     unittest.main()
