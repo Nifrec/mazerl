@@ -23,8 +23,8 @@ class ModelMovementTestCase(unittest.TestCase):
         self.model.reset(self.layout)
 
     def compare_pos(self, expected, result):
-        assert np.allclose(expected, result), \
-            f"expected:{expected}, result:{result}"
+        self.assertTrue(np.allclose(expected, result),
+            f"expected:{expected}, result:{result}")
 
     def test_movement_1(self):
         """
