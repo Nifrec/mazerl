@@ -103,6 +103,9 @@ def __compute_orientation_points(line: Line, p: np.ndarray) -> Orientation:
     Returns:
         * Orientation: whether p0, p1, p2 are aligned clockwise,
             counterclockwise or collinear (i.e. aligned in a straight line).
+
+    NOTE: when using pygame, the y-axis is mirrored (y=0 is at top of screen).
+    This does not influence whether lines are crossing or not.
     """
     # Theory:
     # https://www.geeksforgeeks.org/orientation-3-ordered-points/amp/%c2%a0/
