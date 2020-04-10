@@ -79,6 +79,17 @@ class MazeLayout():
                 return True
         return False
 
+    def compute_min_dist_line_to_wall(self, line: Line) -> Number:
+        """
+        Returns the minimum distance of a given line to any of the walls
+        in this MazeLayout.
+        NOTE: size borders are not considered walls here.
+        """
+        min_dist = float("inf")
+        for maze_line in self.__lines:
+             min_dist = min(min_dist, D.dist_line_to_line(maze_line, line))
+        return min_dist
+
     def __collides(self, ball: Ball, line: Line):
         """
         Checks if a given ball collides with a given line.
@@ -161,11 +172,21 @@ class Model():
         return self.__ball.pos.copy()
 
     def make_timestep(self) -> bool:
+        """
+        Updates velocity and position ball.
+        Returns True if the movement was valid (i.e. no walls or boundaries
+        were hit), False otherwise.
+        """
         self.__ball.vel += self.__ball.acc
+        old_pos = self.__ball.pos.copy()
         self.__ball.pos += self.__ball.vel
 
-        if True:#collision during movement
-            assert False, "TODO: CHECK COLLISIONS DURING MOVEMENT"
+        movement_line = Line(old_pos[0], old_pos[1], 
+                self.__ball.pos[0], self.__ball.pos[1])
+        # Collision during movement
+        if (self.__layout.compute_min_dist_line_to_wall(movement_line) <= self.__ball.rad):
+            return False
+        # Collision with borders (and walls at new pos, but was already checked)
         elif self.does_ball_hit_wall():
             return False
         else:

@@ -8,6 +8,105 @@ import numpy as np
 from record_types import Size, Line, Ball
 from model import Model, MazeLayout
 
+class MovementWallCollisionTestCase(unittest.TestCase):
+    """
+    Test wall detection while the ball is moving.
+    """
+    def setUp(self):
+        self.size = Size(10000, 10000)
+        self.ball_rad = 2
+        self.model = Model(self.size, self.ball_rad)
+
+    def test_moving_wall_detection_1(self):
+        """
+        Sanity check: no walls to collide with.
+        """
+        start = np.array([5, 5])
+        end = np.array([100, 100])
+        walls = set([])
+        layout = MazeLayout(walls, start, end, self.size)
+        self.model.reset(layout)
+
+        self.model.set_acceleration(1, 1)
+        self.assertTrue(self.model.make_timestep()) # position becomes (6, 6)
+        self.model.set_acceleration(0, 0)
+        for x in range(self.size.x - self.ball_rad - 1 - 6):
+            self.assertTrue(self.model.make_timestep())
+        # Should have reached end of rectangle now.
+        self.assertFalse(self.model.make_timestep())
+
+    def test_moving_wall_detection_2(self):
+        """
+        Base case: does not collide with a wall.
+        """
+        start = np.array([5, 5])
+        end = np.array([100, 100])
+        walls = set([Line(0, 0, 1, 1009), Line(100, 1000, 101, 1002)])
+        layout = MazeLayout(walls, start, end, self.size)
+        self.model.reset(layout)
+
+        self.model.set_acceleration(1, 1)
+        self.assertTrue(self.model.make_timestep()) # position becomes (6, 6)
+        self.model.set_acceleration(0, 0)
+        for _ in range(self.size.x - self.ball_rad - 1 - 6):
+            self.assertTrue(self.model.make_timestep())
+        # Should have reached end of rectangle now.
+        self.assertFalse(self.model.make_timestep())
+
+    def test_moving_wall_detection_3(self):
+        """
+        Base case: does collide heads-on.
+        """
+        start = np.array([5, 5])
+        end = np.array([100, 100])
+        walls = set([Line(10, 0, 10, 10)])
+        layout = MazeLayout(walls, start, end, self.size)
+        self.model.reset(layout)
+
+        self.model.set_acceleration(5, 0)
+        self.assertFalse(self.model.make_timestep()) # position becomes (10, 5)
+
+    def test_moving_wall_detection_4(self):
+        """
+        Corner case: does collide heads-on, but sufficient high speed to
+        end up beyond the wall in one step.
+        """
+        start = np.array([5, 5])
+        end = np.array([100, 100])
+        walls = set([Line(10, 0, 10, 10)])
+        layout = MazeLayout(walls, start, end, self.size)
+        self.model.reset(layout)
+
+        self.model.set_acceleration(10, 0)
+        self.assertFalse(self.model.make_timestep()) # position becomes (15, 5)
+        self.assertTrue(self.model.make_timestep()) # far from wall now.
+
+    def test_moving_wall_detection_5(self):
+        """
+        Base case: does not hit wall with center of ball.
+        """
+        start = np.array([3, 3])
+        end = np.array([100, 100])
+        walls = set([Line(0, 10, 2, 10)])
+        layout = MazeLayout(walls, start, end, self.size)
+        self.model.reset(layout)
+
+        self.model.set_acceleration(0, 1)
+        self.assertTrue(self.model.make_timestep()) # position becomes (3, 4)
+        self.model.set_acceleration(0, 0)
+
+        self.assertTrue(self.model.make_timestep()) # position becomes (3, 5)
+        self.assertTrue(self.model.make_timestep()) # position becomes (3, 6)
+        self.assertTrue(self.model.make_timestep()) # position becomes (3, 7)
+        self.assertTrue(self.model.make_timestep()) # position becomes (3, 8)
+        # Should touch wall now. (dist((3, 9), (2, 10)) = sqrt(2) < rad))
+        self.assertFalse(self.model.make_timestep()) # position becomes (3, 9)
+        
+        self.assertTrue(self.model.make_timestep())
+        self.assertTrue(self.model.make_timestep())
+    
+
+
 class ModelMovementTestCase(unittest.TestCase):
     """
     Basic movement without walls.
