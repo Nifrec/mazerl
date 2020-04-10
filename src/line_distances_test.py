@@ -77,6 +77,8 @@ class DoLinesIntersectTestCase(unittest.TestCase):
 class OrientationLinesTestCase(unittest.TestCase):
     """
     Tests __compute_orientation_points function.
+    NOTE: when using pygame, the y-axis is mirrored (y=0 is at top of screen).
+    This does not influence whether lines are crossing or not.
     """
 
     def test_orientation_1(self):
