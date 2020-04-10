@@ -53,7 +53,7 @@ def dist_line_segment_line_segment(line_0: Line,
     """
     # 2 cases: 
     # Case 1: the lines intersect -> dist = 0
-    if (__do_lines_intersect(line_0, line_1)):
+    if (do_lines_intersect(line_0, line_1)):
         return 0
     else:
         # Case 2: Return minimum distance of any eindpoint to the other line.
@@ -64,7 +64,7 @@ def dist_line_segment_line_segment(line_0: Line,
         return min(d0, d1, d2, d3)
 
 
-def __do_lines_intersect(line_0: Line, line_1: Line) -> bool:
+def do_lines_intersect(line_0: Line, line_1: Line) -> bool:
     """
     Returns whether two finite line segments intersect.
     """
@@ -110,7 +110,7 @@ def __compute_orientation_points(p0: np.ndarray, p1: np.ndarray,
     slope_p0_p1 = __compute_slope_two_points(p0, p1)
     slope_p1_p2 = __compute_slope_two_points(p1, p2)
 
-    if math.isclose(slope_p0_p1 == slope_p1_p2):
+    if math.isclose(slope_p0_p1, slope_p1_p2):
         return Orientation.COLLINEAR
     elif (slope_p0_p1 > slope_p1_p2):
         # A right turn is made from slope_p0_p1 to slope_p1_p2
