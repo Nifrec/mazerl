@@ -4,7 +4,8 @@ File to test the Line class of model.py
 Author: Lulof Pirée
 """
 import unittest
-from model import Line, get_line_implicit_coefs
+from record_types import Line
+from distances import __get_line_implicit_coefs as get_line_implicit_coefs
 
 class get_line_implicit_coefs_test(unittest.TestCase):
 

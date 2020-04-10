@@ -4,8 +4,10 @@ File to test the MazeLayout class of model.py
 Author: Lulof Pirée
 """
 import unittest
-from model import Ball, Line, Size, MazeLayout
 import numpy as np
+from record_types import Ball, Line, Size
+from model import MazeLayout
+
 
 SIZE_DUMMY = Size(9999999999, 9999999999999)
 START_DUMMY = np.array([0, 0])
