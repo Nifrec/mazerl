@@ -75,10 +75,10 @@ def do_lines_intersect(line_0: Line, line_1: Line) -> bool:
     # and one endpoint of the other line.
     # For lines AB and XY, that are O(A, B, X), O(A, B, Y),
     # O(X, Y, A), O(X, Y, B) (where O is the orientation)
-    orient_0 = __compute_orientation_points(line_0.p0, line_0.p1, line_1.p0)
-    orient_1 = __compute_orientation_points(line_0.p0, line_0.p1, line_1.p1)
-    orient_2 = __compute_orientation_points(line_1.p0, line_1.p1, line_0.p0)
-    orient_3 = __compute_orientation_points(line_1.p0, line_1.p1, line_0.p1)
+    orient_0 = __compute_orientation_points(line_0, line_1.p0)
+    orient_1 = __compute_orientation_points(line_0, line_1.p1)
+    orient_2 = __compute_orientation_points(line_1, line_0.p0)
+    orient_3 = __compute_orientation_points(line_1, line_0.p1)
 
     # If the lines intersect, the triangle above the interseaction has
     # a reverse orientation as the triangle below, for both pairs of triagles.
@@ -96,10 +96,10 @@ def do_lines_intersect(line_0: Line, line_1: Line) -> bool:
     else:
         return False
 
-def __compute_orientation_points(p0: np.ndarray, p1: np.ndarray,
-        p2: np.ndarray) -> Orientation:
+def __compute_orientation_points(line: Line, p: np.ndarray) -> Orientation:
     """
-    Returns whether three points are aligned in clockwise order.
+    Returns whether three points (of which two from a line) 
+    are aligned in clockwise order.
 
     Returns:
         * Orientation: whether p0, p1, p2 are aligned clockwise,
@@ -107,20 +107,33 @@ def __compute_orientation_points(p0: np.ndarray, p1: np.ndarray,
     """
     # Theory:
     # https://www.geeksforgeeks.org/orientation-3-ordered-points/amp/%c2%a0/
-    slope_p0_p1 = __compute_slope_two_points(p0, p1)
-    slope_p1_p2 = __compute_slope_two_points(p1, p2)
 
-    if math.isclose(slope_p0_p1, slope_p1_p2):
+    # Brute force implementation:
+    # __compute_slope_two_points(p0: np.ndarray, p1: np.ndarray) -> Number:
+    # Slope = Dy / Dx
+    # return (p1[1]-p0[1]) / (p1[0] - p0[0])
+    # Then: slope_line = __compute_slope_two_points(line.p0, line.p1)
+    # slope_to_point = __compute_slope_two_points(line.p1, p2)
+    # and CLOCKWISE if slope_line > slope_to_point
+    # -- problem -- notice the numerical instability if p1[0] == p0[0]!
+    # --> Solved by simple algebraic manipulation.
+
+
+    # Ensure line is read from left to right
+    if (line.p0[0] <= line.p1[0]):
+        alpha = (line.p1[1] - line.p0[1]) * (p[0] - line.p1[0]) 
+        beta = (p[1] - line.p1[1]) * (line.p1[0] - line.p0[0])
+    else:
+        alpha = (line.p0[1] - line.p1[1]) * (p[0] - line.p0[0]) 
+        beta = (p[1] - line.p0[1]) * (line.p0[0] - line.p1[0])
+
+    if math.isclose(alpha, beta):
         return Orientation.COLLINEAR
-    elif (slope_p0_p1 > slope_p1_p2):
+    elif (alpha - beta > 0):
         # A right turn is made from slope_p0_p1 to slope_p1_p2
         return Orientation.CLOCKWISE
     else:
         return Orientation.COUNTERCLOCKWISE
-
-def __compute_slope_two_points(p0: np.ndarray, p1: np.ndarray) -> Number:
-    # Slope = Dy / Dx
-    return (p1[1]-p0[1]) / (p1[0] - p0[0])
 
 def __do_collinear_lines_intersect(line_0: Line, 
         line_1: Line) -> bool:

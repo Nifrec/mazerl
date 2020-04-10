@@ -44,12 +44,12 @@ class DoLinesIntersectTestCase(unittest.TestCase):
 
     def test_intersect_4(self):
         """
-        Base case: collinear, no intersect.
+        Base case: collinear, do intersect.
         """
         line_0 = Line(5, 5, 15, 15)
         line_1 = Line(3, 3, 12, 12)
 
-        self.assertFalse(do_lines_intersect(line_0, line_1))
+        self.assertTrue(do_lines_intersect(line_0, line_1))
 
     def test_intersect_5(self):
         """
@@ -57,6 +57,15 @@ class DoLinesIntersectTestCase(unittest.TestCase):
         """
         line_0 = Line(0, 0, 3, 3)
         line_1 = Line(4.3, 4.3, 12, 12)
+
+        self.assertFalse(do_lines_intersect(line_0, line_1))
+
+    def test_intersect_6(self):
+        """
+        Base case: collinear, do not intersect.
+        """
+        line_0 = Line(5, 5, 15, 15)
+        line_1 = Line(5, 4, 15, 14)
 
         self.assertFalse(do_lines_intersect(line_0, line_1))
 
@@ -70,10 +79,9 @@ class OrientationLinesTestCase(unittest.TestCase):
         """
         Base case: simple clockwise triangle.
         """
-        p0 = np.array([0, 0])
-        p1 = np.array([1, 1])
-        p2 = np.array([2, 0])
-        output = compute_orientation_points(p0, p1, p2)
+        line = Line(0, 0, 1, 1)
+        p = np.array([2, 0])
+        output = compute_orientation_points(line, p)
 
         self.assertEqual(Orientation.CLOCKWISE, output)
 
@@ -81,10 +89,9 @@ class OrientationLinesTestCase(unittest.TestCase):
         """
         Base case: simple counterclockwise triangle.
         """
-        p0 = np.array([0, 0])
-        p1 = np.array([-1, -1])
-        p2 = np.array([2, 0])
-        output = compute_orientation_points(p0, p1, p2)
+        line = Line(0, 0, 1, 0)
+        p = np.array([3, 2])
+        output = compute_orientation_points(line, p)
 
         self.assertEqual(Orientation.COUNTERCLOCKWISE, output)
 
@@ -92,10 +99,9 @@ class OrientationLinesTestCase(unittest.TestCase):
         """
         Base case: simple collinear line.
         """
-        p0 = np.array([0, 0])
-        p1 = np.array([5, 5])
-        p2 = np.array([2, 2])
-        output = compute_orientation_points(p0, p1, p2)
+        line = Line(0, 0, 5, 5)
+        p = np.array([2, 2])
+        output = compute_orientation_points(line, p)
 
         self.assertEqual(Orientation.COLLINEAR, output)
 
@@ -103,32 +109,49 @@ class OrientationLinesTestCase(unittest.TestCase):
         """
         Base case: right-angle clockwise triangle.
         """
-        p0 = np.array([0, 0])
-        p1 = np.array([1, 1])
-        p2 = np.array([2, 1])
-        output = compute_orientation_points(p0, p1, p2)
+        line = Line(0, 0, 1, 1)
+        p = np.array([2, 1])
+        output = compute_orientation_points(line, p)
 
         self.assertEqual(Orientation.CLOCKWISE, output)
 
     def test_orientation_5(self):
         """
-        Base case: wide-angle counterclockwise triangle.
+        Base case: wide-angle clockwise triangle.
         """
-        p0 = np.array([1, 1])
-        p1 = np.array([2, 1])
-        p2 = np.array([3, 0])
-        output = compute_orientation_points(p0, p1, p2)
+        line = Line(1, 1, 2, 1)
+        p = np.array([3, 0])
+        output = compute_orientation_points(line, p)
 
-        self.assertEqual(Orientation.COUNTERCLOCKWISE, output)
+        self.assertEqual(Orientation.CLOCKWISE, output)
 
     def test_orientation_6(self):
         """
         Base case: right-angle counterclockwise triangle.
         """
-        p0 = np.array([1, 1])
-        p1 = np.array([2, 1])
-        p2 = np.array([2, 0])
-        output = compute_orientation_points(p0, p1, p2)
+        line = Line(1, 1, 2, 1)
+        p = np.array([2, 2])
+        output = compute_orientation_points(line, p)
+
+        self.assertEqual(Orientation.COUNTERCLOCKWISE, output)
+
+    def test_orientation_7(self):
+        """
+        Corner case: clockwise, 2 points same x-val.
+        """
+        line = Line(1, 1, 1, 2)
+        p = np.array([2, 2])
+        output = compute_orientation_points(line, p)
+
+        self.assertEqual(Orientation.CLOCKWISE, output)
+
+    def test_orientation_8(self):
+        """
+        Corner case: counterclockwise, 2 points same x-val.
+        """
+        line = Line(1, 1, 1, 2)
+        p = np.array([0, 2])
+        output = compute_orientation_points(line, p)
 
         self.assertEqual(Orientation.COUNTERCLOCKWISE, output)
 
