@@ -12,11 +12,6 @@ import enum
 import distances as D
 from record_types import Size, Line, Ball
 
-class Orientation(enum.Enum):
-    CLOCKWISE = 1
-    COUNTERCLOCKWISE = 2
-    COLLINEAR = 3
-
 class MazeLayout():
     """
     Class representing a maze room: defines the walls,
