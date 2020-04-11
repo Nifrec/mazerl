@@ -112,6 +112,7 @@ class MazeLayout():
         NOTE: Ensure that the supplied Visualizer implementation
         can render to the supplied target.
         """
+        visualizer.render_end(self.__end, target)
         return visualizer.render_lines(self.__lines, target)
 
     def get_start(self):
