@@ -42,7 +42,7 @@ class Ball():
     """
     def __init__(self, x: Number, y: Number, rad: Number, x_vel: Number=0,
             y_vel: Number=0, x_acc: Number=0, y_acc: Number=0):
-        self.pos = np.array([x, y])
+        self.pos = np.array([x, y], dtype=np.float)
         self.rad = rad
-        self.vel = np.array([x_vel, y_vel])
-        self.acc = np.array([x_acc, y_acc])
+        self.vel = np.array([x_vel, y_vel], dtype=np.float)
+        self.acc = np.array([x_acc, y_acc], dtype=np.float)

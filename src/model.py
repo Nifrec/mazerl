@@ -134,7 +134,7 @@ class Model():
         self.__layout = None
 
     def set_acceleration(self, x_acc: Number, y_acc: Number):
-        self.__ball.acc = np.array([x_acc, y_acc])
+        self.__ball.acc = np.array([x_acc, y_acc], dtype=np.float)
 
     def reset(self, new_layout: MazeLayout = None):
         """
@@ -152,9 +152,9 @@ class Model():
             assert(isinstance(new_layout, MazeLayout))
             self.__layout = new_layout
 
-        self.__ball.acc = np.array([0, 0])
-        self.__ball.vel = np.array([0, 0])
-        self.__ball.pos = self.__layout.get_start()
+        self.__ball.acc = np.array([0, 0], dtype=np.float)
+        self.__ball.vel = np.array([0, 0], dtype=np.float)
+        self.__ball.pos = self.__layout.get_start().astype(np.float)
 
     def __check_valid_new_layout(self, new_layout: MazeLayout):
         if (new_layout is None) and (self.__layout is None):
@@ -196,7 +196,8 @@ class Model():
         movement_line = Line(old_pos[0], old_pos[1], 
                 self.__ball.pos[0], self.__ball.pos[1])
         # Collision during movement
-        if (self.__layout.compute_min_dist_line_to_wall(movement_line) <= self.__ball.rad):
+        if (self.__layout.compute_min_dist_line_to_wall(movement_line) 
+                <= self.__ball.rad):
             return False
         # Collision with borders (and walls at new pos, but was already checked)
         elif self.does_ball_hit_wall():

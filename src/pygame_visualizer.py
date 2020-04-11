@@ -36,8 +36,8 @@ class PygameVisualizer(Visualizer):
         Draws a Ball to a pygame.Surface instance,
         with PygameVisualizer.BALL_COLOR as color.
         """
-        pygame.draw.circle(target, PygameVisualizer.BALL_COLOR, ball.pos,
-                ball.rad, 0)
+        pygame.draw.circle(target, PygameVisualizer.BALL_COLOR, 
+                ball.pos.round().astype(np.int), ball.rad, 0)
         return target
 
     @staticmethod
