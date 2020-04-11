@@ -84,15 +84,19 @@ class HumanInterface():
             elif (event.type == pygame.KEYDOWN): # If a button is pressed
                 if (event.key == pygame.K_ESCAPE): # User pressed ESC
                     self.__is_running = False
-                    
-                if (event.key == pygame.K_a) or (event.key == pygame.K_LEFT):
-                    self.__model.set_acceleration(-ACC_INCR_BUTTON_PRESS, 0)
-                elif (event.key == pygame.K_w) or (event.key == pygame.K_UP):
-                    self.__model.set_acceleration(0, -ACC_INCR_BUTTON_PRESS)
-                elif (event.key == pygame.K_d) or (event.key == pygame.K_RIGHT):
-                    self.__model.set_acceleration(ACC_INCR_BUTTON_PRESS, 0)
-                elif (event.key == pygame.K_s) or (event.key == pygame.K_DOWN):
-                    self.__model.set_acceleration(0, ACC_INCR_BUTTON_PRESS)
+        
+        self.process_held_keys()
+
+    def process_held_keys(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+            self.__model.set_acceleration(-ACC_INCR_BUTTON_PRESS, 0)
+        elif keys[pygame.K_w] or keys[pygame.K_UP]:
+            self.__model.set_acceleration(0, -ACC_INCR_BUTTON_PRESS)
+        elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            self.__model.set_acceleration(ACC_INCR_BUTTON_PRESS, 0)
+        elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
+            self.__model.set_acceleration(0, ACC_INCR_BUTTON_PRESS)
                 
 
     def process_model(self):
@@ -153,11 +157,15 @@ class HumanInterface():
                 # T
                 Line(150, 1, 200, 1),
                 Line(180, 1, 180, 100),
+                # Unrelated.
+                Line(0, 200, 200, 200),
+                Line(100, 250, 400, 250),
+                Line(200, 400, 500, 400)
                 ])
 
         print(self.__size.x, self.__size.y)
         start = np.array([300, 300])
-        end = np.array([400, 400])
+        end = np.array([125, 20])
         layout = MazeLayout(lines, start, end, self.__size)
 
         self.__model.reset(layout)
