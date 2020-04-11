@@ -87,7 +87,7 @@ class MovementWallCollisionTestCase(unittest.TestCase):
         """
         start = np.array([3, 3])
         end = np.array([100, 100])
-        walls = set([Line(0, 10, 2, 10)])
+        walls = set([Line(0, 10, 1, 10)])
         layout = MazeLayout(walls, start, end, self.size)
         self.model.reset(layout)
 
@@ -99,10 +99,10 @@ class MovementWallCollisionTestCase(unittest.TestCase):
         self.assertTrue(self.model.make_timestep()) # position becomes (3, 6)
         self.assertTrue(self.model.make_timestep()) # position becomes (3, 7)
         self.assertTrue(self.model.make_timestep()) # position becomes (3, 8)
-        # Should touch wall now. (dist((3, 9), (2, 10)) = sqrt(2) < rad))
-        self.assertFalse(self.model.make_timestep()) # position becomes (3, 9)
-        
-        self.assertTrue(self.model.make_timestep())
+        self.assertTrue(self.model.make_timestep()) # position becomes (3, 9)
+        self.assertFalse(self.model.make_timestep()) # position becomes (3, 10)
+        # Next one still hits at start of timestep!
+        self.assertFalse(self.model.make_timestep()) # position becomes (3, 11)
         self.assertTrue(self.model.make_timestep())
     
 
