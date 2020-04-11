@@ -6,11 +6,13 @@ Author: Lulof Pirée
 # Library imports
 import math
 from numbers import Number
+from typing import Any
 import numpy as np
 import enum
 # Local imports
 import distances as D
 from record_types import Size, Line, Ball
+from abstract_visualizer import Visualizer
 
 class MazeLayout():
     """
@@ -66,7 +68,7 @@ class MazeLayout():
                 or (point[0] >= self.__size.x) \
                 or (point[1] >= self.__size.y):
             raise ValueError(self.__class__.__name__ 
-                + ": Invalid input: data beyond layout size.")
+                + f": Invalid input: datapoint {point} beyond layout size.")
 
     def is_ball_at_finish(self, ball: Ball):
         return (D.euclidean_dist(self.__end, ball.pos) <= ball.rad)
@@ -102,6 +104,15 @@ class MazeLayout():
             return True
         else:
             return False
+
+    def render(self, visualizer: Visualizer, target: Any) -> Any:
+        """
+        Renders the walls of this MazeLayout to the target object.
+
+        NOTE: Ensure that the supplied Visualizer implementation
+        can render to the supplied target.
+        """
+        return visualizer.render_lines(self.__lines, target)
 
     def get_start(self):
         return self.__start.copy()
@@ -192,8 +203,20 @@ class Model():
         else:
             return True
 
-    def render(self):
-        pass
+    def render(self, visualizer: Visualizer) -> Any:
+        """
+        Renders the maze using the supplied Visualizer implementation.
+        
+        NOTE: Ensure that the supplied Visualizer implementation
+        can render to the supplied target.
+        """
+        target = visualizer.create_rendered_object(self.__size)
+        self.__layout.render(visualizer, target)
+        visualizer.render_ball(self.__ball, target)
+        return target
+
+    def get_layout(self):
+        return self.__layout
 
 def check_validity_point(point: np.ndarray):
     if not isinstance(point, np.ndarray):
