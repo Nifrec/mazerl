@@ -26,7 +26,7 @@ class PygameVisualizer(Visualizer):
     WALL_COLOR = pygame.Color(0, 228, 255)
     END_COLOR = pygame.Color(255, 0, 0)
     END_HALO_COLOR = pygame.Color(255, 135, 135)
-    END_HALO_RAD = 30
+    END_HALO_RAD = 15
     LINE_WIDTH = 1
 
     @staticmethod
