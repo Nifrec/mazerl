@@ -1,6 +1,13 @@
 """
 File providing a human interface to the maze simulation.
+This is not very polished, just to test the environment
+and experience how the agent sees it.
 Uses pygame for rendering and input.
+
+Move the ball with the arrows or WASD, press ESC to quit.
+If the goal is reached the screen becomes green for a second and resets,
+if a wall is hit (i.e. you 'died'), the screen becomes red for a second 
+and resets.
 
 Author: Lulof Pirée
 """
@@ -10,6 +17,7 @@ from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 import numpy as np
+import time
 
 from model import Model, MazeLayout
 from record_types import Size, Line
@@ -20,7 +28,11 @@ FPS = 30
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 480
 FULLSCREEN = False
-
+RED = pygame.Color(255, 0, 0)
+GREEN = pygame.Color(0, 255, 0)
+GAME_OVER_TIME = 1
+BALL_RAD = 10
+ACC_INCR_BUTTON_PRESS = 0.1
 
 
 class HumanInterface():
@@ -41,14 +53,19 @@ class HumanInterface():
         # Color background
         #self._screen.fill(backgroundcolor)
         pygame.display.flip()
+        self.__model = Model(self.__size, BALL_RAD)
         self.create_test_maze()
+        self.render_model()
         self.run()
 
     def run(self):
+
         self.__is_running = True
         while(self.__is_running):
             self.__clock.tick(self.__fps)
             self.process_events()
+            self.process_model()
+            self.render_model()
             pygame.display.flip()
         pygame.quit()
 
@@ -58,7 +75,6 @@ class HumanInterface():
         This method registers keypresses and maps them to
         their effects.
         """
-
         # Now process pygame events (keyboard keys or controller buttons)
         for event in pygame.event.get():
 
@@ -68,13 +84,57 @@ class HumanInterface():
             elif (event.type == pygame.KEYDOWN): # If a button is pressed
                 if (event.key == pygame.K_ESCAPE): # User pressed ESC
                     self.__is_running = False
+                    
+                if (event.key == pygame.K_a) or (event.key == pygame.K_LEFT):
+                    self.__model.set_acceleration(-ACC_INCR_BUTTON_PRESS, 0)
+                elif (event.key == pygame.K_w) or (event.key == pygame.K_UP):
+                    self.__model.set_acceleration(0, -ACC_INCR_BUTTON_PRESS)
+                elif (event.key == pygame.K_d) or (event.key == pygame.K_RIGHT):
+                    self.__model.set_acceleration(ACC_INCR_BUTTON_PRESS, 0)
+                elif (event.key == pygame.K_s) or (event.key == pygame.K_DOWN):
+                    self.__model.set_acceleration(0, ACC_INCR_BUTTON_PRESS)
+                
+
+    def process_model(self):
+        """
+        Updates the maze model and checks if the episde ended.
+        """
+        hit_wall = not self.__model.make_timestep()
+        # Only accelerate while button is pressed, note that vel is preserved.
+        self.__model.set_acceleration(0, 0)
+        if (hit_wall):
+            self.death_screen()
+            self.create_test_maze()
+        elif (self.__model.is_ball_at_finish()):
+            self.win_screen()
+            self.create_test_maze()
+
+    def death_screen(self):
+        """
+        Show a red screen for a few seconds.
+        """
+        print("Hit a wall, negative end of episode reached.")
+        self.__screen.fill(RED)
+        pygame.display.flip()
+        time.sleep(GAME_OVER_TIME)
+
+    def win_screen(self):
+        """
+        Show a green screen for a few seconds.
+        """
+        print("Reached exit, positive end of episode reached.")
+        self.__screen.fill(GREEN)
+        pygame.display.flip()
+        time.sleep(GAME_OVER_TIME)
+    
+    def render_model(self):
+        surf = self.__model.render(PygameVisualizer)
+        self.__screen.blit(surf, (0, 0))
 
     def create_test_maze(self):
         """
         Creates a simple hard-coded maze to test the rendering.
         """
-        rad = 10
-        model = Model(self.__size, rad)
         lines = set([
                 # T
                 Line(1, 1, 50, 1),
@@ -100,9 +160,7 @@ class HumanInterface():
         end = np.array([400, 400])
         layout = MazeLayout(lines, start, end, self.__size)
 
-        model.reset(layout)
-        surf = model.render(PygameVisualizer)
-        self.__screen.blit(surf, (0, 0))
+        self.__model.reset(layout)
 
 
 if __name__ == "__main__":
