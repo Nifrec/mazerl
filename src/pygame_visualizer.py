@@ -6,11 +6,13 @@ Author: Lulof Pirée
 
 # Library imports
 import abc
-from typing import Set
+from typing import Set, Iterable
+from numbers import Number
 from os import environ
 # Disable pygame welcome message. Need to be set before 'import pygame'
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
+import numpy as np
 # Local imports
 from record_types import Ball, Line, Size
 from abstract_visualizer import Visualizer
@@ -22,6 +24,9 @@ class PygameVisualizer(Visualizer):
     BACKGROUND_COLOR = pygame.Color(221, 251, 255)
     BALL_COLOR = pygame.Color( 255, 147, 0 )
     WALL_COLOR = pygame.Color(0, 228, 255)
+    END_COLOR = pygame.Color(255, 0, 0)
+    END_HALO_COLOR = pygame.Color(255, 135, 135)
+    END_HALO_RAD = 30
     LINE_WIDTH = 1
 
     @staticmethod
@@ -48,6 +53,21 @@ class PygameVisualizer(Visualizer):
             pygame.draw.line(target, PygameVisualizer.WALL_COLOR, line.p0,
                     line.p1, PygameVisualizer.LINE_WIDTH)
 
+        return target
+
+    @staticmethod
+    def render_end(position: Iterable[Number], target: pygame.Surface) \
+                -> pygame.Surface:
+        """
+        Render a maze endpoint to pygame.Surface.
+        Draws the exact pixed in PygameVisualizer.END_COLOR,
+        and surrounds it with a circle of color PygameVisualizer.END_HALO_COLOR
+        and radius PygameVisualizer.END_HALO_RAD.
+        """
+        pygame.draw.circle(target, PygameVisualizer.END_HALO_COLOR, position,
+                PygameVisualizer.END_HALO_RAD, 0)
+        target.set_at(position, PygameVisualizer.END_COLOR)
+        
         return target
 
     @staticmethod

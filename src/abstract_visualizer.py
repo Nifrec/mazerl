@@ -5,7 +5,8 @@ Author: Lulof Pirée
 """
 # Library imports
 import abc
-from typing import Any, Set
+from typing import Any, Set, Iterable
+from numbers import Number
 # Local imports
 from record_types import Ball, Line, Size
 
@@ -27,6 +28,14 @@ class Visualizer(abc.ABC):
     def render_lines(lines: Set[Line], target: Any) -> Any:
         """
         Render each Line in a set of lines to a target picture object.
+        """
+        return target
+
+    @staticmethod
+    @abc.abstractmethod
+    def render_end(position: Iterable[Number], target: Any) -> Any:
+        """
+        Render a maze endpoint to a target picture object.
         """
         return target
 
