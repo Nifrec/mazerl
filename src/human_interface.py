@@ -45,9 +45,29 @@ class HumanInterface():
         self.run()
 
     def run(self):
-        while(True):
+        self.__is_running = True
+        while(self.__is_running):
             self.__clock.tick(self.__fps)
+            self.process_events()
             pygame.display.flip()
+        pygame.quit()
+
+     
+    def process_events(self):
+        """
+        This method registers keypresses and maps them to
+        their effects.
+        """
+
+        # Now process pygame events (keyboard keys or controller buttons)
+        for event in pygame.event.get():
+
+            if (event.type == pygame.QUIT): # If user closes pygame window
+                self.__is_running = False
+            
+            elif (event.type == pygame.KEYDOWN): # If a button is pressed
+                if (event.key == pygame.K_ESCAPE): # User pressed ESC
+                    self.__is_running = False
 
     def create_test_maze(self):
         """
