@@ -11,7 +11,7 @@ from typing import Set
 # Local imports
 from model import MazeLayout
 from record_types import Line, Size
-from maze_generator import Direction, MazeBlock
+from maze_generator import Direction, MazeBlock, MazeGenerator
 
 class MazeBlockTestCase(unittest.TestCase):
 
@@ -103,6 +103,22 @@ class MazeBlockTestCase(unittest.TestCase):
         print("MazeBlock: set_up 4:")
         print(f"Expected:{expected}, result: {result}")
         self.check_sets_of_lines_equal(expected, result)
+
+class MazeGeneratorTestCase(unittest.TestCase):
+    """
+    Since the methods of MazeGenerator are non-deterministic,
+    these tests only confirm some basic properties of the outputs.
+    """
+
+    def test_generate_partition(self):
+        gen = MazeGenerator()
+        block_size = 10
+        size = Size(100, 150)
+
+        result = gen._MazeGenerator__generate_block_partition(size, block_size)
+
+        assert(isinstance(result[0][0], MazeBlock))
+        assert(result.shape == (10, 15))
         
 
 if (__name__ == "__main__"):

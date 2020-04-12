@@ -7,6 +7,8 @@ Author: Lulof Pirée
 from numbers import Number
 from typing import Tuple, Set
 import enum
+import math
+import numpy as np
 # Local imports
 from model import MazeLayout
 from record_types import Line, Size
@@ -17,16 +19,6 @@ class Direction(enum.Enum):
     UP=3
     DOWN=4
 
-class MazeGenerator():
-
-    @staticmethod
-    def generate_maze(size: Size, radius: Number) -> MazeLayout:
-        """
-        Generate a new maze of the given size for a ball of the given
-        radius (the radius needed to determine the minimum width of
-        maze 'corridors').
-        """
-        pass
 
 class MazeBlock():
     """
@@ -114,3 +106,42 @@ class MazeBlock():
 
     def get_pos(self) -> Tuple[int]:
         return self.__x, self.__y
+
+class MazeGenerator():
+
+    @staticmethod
+    def generate_maze(size: Size, radius: Number, offset: Number) -> MazeLayout:
+        """
+        Generate a new maze of the given size for a ball of the given
+        radius (the radius needed to determine the minimum width of
+        maze 'corridors').
+
+        Arguments:
+        * size: target size of generated MazeLayout
+        * radius: radius of ball for which the maze is intended
+        * offset: minimum extra space added to both sides of a corridor
+                to give the ball more space. 
+                This is a measure for difficulty, as narrow corridors are harder
+                to navigate through.
+        """
+        # +2 because each on-path block may contain 2 1-pixel-broad walls.
+        block_size = radius + 2 + offset
+        blocks = MazeGenerator.__generate_block_partition(size, block_size)
+
+
+    @staticmethod
+    def __generate_block_partition(size: Size, block_size:Number) -> np.ndarray:
+        num_x_blocks = math.ceil(size.x / block_size)
+        num_y_blocks = math.ceil(size.y / block_size)
+        blocks = np.empty((num_x_blocks, num_y_blocks), dtype=MazeBlock)
+        x = 0
+        y = 0
+        for row in range(num_x_blocks):
+            y = 0
+            for col in range(num_x_blocks):
+                blocks[row][col] = MazeBlock(x, y, block_size, block_size)
+                y += block_size
+            x += block_size
+        return blocks
+
+
