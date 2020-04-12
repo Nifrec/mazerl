@@ -5,10 +5,11 @@ Author: Lulof Pirée
 """
 # Library imports
 from numbers import Number
-from typing import Tuple, Set, Int
+from typing import Tuple, Set
 import enum
 import math
 import numpy as np
+import random
 # Local imports
 from model import MazeLayout
 from record_types import Line, Size
@@ -104,21 +105,27 @@ class MazeBlock():
                 "Cannot exit and enter via same edge"
         self.__direction_out = direction
 
+    def reset(self):
+        """
+        Reset the stored in/out directions of the path through this block.
+        """
+        self.__direction_in = None
+        self.__direction_out = None
+
     def get_pos(self) -> Tuple[int]:
         return self.__x, self.__y
 
 class MazeGenerator():
 
-    def generate_maze(self, size: Size, radius: Number, offset: Number) \
-            -> MazeLayout:
+    def __init__(self, size: Size, radius: Number, offset: Number):
         """
-        Generate a new maze of the given size for a ball of the given
-        radius (the radius needed to determine the minimum width of
-        maze 'corridors').
+        Configure the settings for generating random mazes.
 
         Arguments:
-        * size: target size of generated MazeLayout
+        * size: target size of generated MazeLayout.
         * radius: radius of ball for which the maze is intended
+                (needed to determine the minimum width of
+                maze 'corridors')
         * offset: minimum extra space added to both sides of a corridor
                 to give the ball more space. 
                 This is a measure for difficulty, as narrow corridors are harder
@@ -126,24 +133,35 @@ class MazeGenerator():
         """
         # +2 because each on-path block may contain 2 1-pixel-broad walls.
         block_size = radius + 2 + offset
-        blocks = MazeGenerator.__generate_block_partition(size, block_size)
-
+        self.__blocks = self.__generate_block_partition(size, block_size)
         
-
+    def generate_maze(self) -> MazeLayout:
+        """
+        Generate a new random maze for the configured settings.
+        """
+        pass
+        
     def __generate_block_partition(self, size: Size, block_size: Number) \
                 -> np.ndarray:
-        num_rows = math.ceil(size.x / block_size)
-        num_cols = math.ceil(size.y / block_size)
-        blocks = np.empty((num_x_blocks, num_y_blocks), dtype=MazeBlock)
+        self.__num_rows = math.ceil(size.x / block_size)
+        self.__num_cols = math.ceil(size.y / block_size)
+        blocks = np.empty((self.__num_rows, self.__num_cols), dtype=MazeBlock)
         x = 0
         y = 0
-        for row in range(num_rows):
+        for row in range(self.__num_rows):
             y = 0
-            for col in range(num_cols):
+            for col in range(self.__num_cols):
                 blocks[row][col] = MazeBlock(x, y, block_size, block_size)
                 y += block_size
             x += block_size
         return blocks
+
+    def __reset_blocks(self):
+        """
+        Erases all in/out directions stored in all blocks.
+        """
+        for block in np.nditer(self.__blocks):
+            block.reset()
 
     def __choose_random_start(self, blocks: np.ndarray) -> np.ndarray:
         """
@@ -160,7 +178,3 @@ class MazeGenerator():
         """
         row = random.randrange(self.__num_rows)
         return np.array([row, self.__num_cols - 1])
-
-
-
-
