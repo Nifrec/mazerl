@@ -5,7 +5,7 @@ Author: Lulof Pirée
 """
 # Library imports
 from numbers import Number
-from typing import Tuple, Set
+from typing import Tuple, Set, Int
 import enum
 import math
 import numpy as np
@@ -109,8 +109,8 @@ class MazeBlock():
 
 class MazeGenerator():
 
-    @staticmethod
-    def generate_maze(size: Size, radius: Number, offset: Number) -> MazeLayout:
+    def generate_maze(self, size: Size, radius: Number, offset: Number) \
+            -> MazeLayout:
         """
         Generate a new maze of the given size for a ball of the given
         radius (the radius needed to determine the minimum width of
@@ -128,20 +128,39 @@ class MazeGenerator():
         block_size = radius + 2 + offset
         blocks = MazeGenerator.__generate_block_partition(size, block_size)
 
+        
 
-    @staticmethod
-    def __generate_block_partition(size: Size, block_size:Number) -> np.ndarray:
-        num_x_blocks = math.ceil(size.x / block_size)
-        num_y_blocks = math.ceil(size.y / block_size)
+    def __generate_block_partition(self, size: Size, block_size: Number) \
+                -> np.ndarray:
+        num_rows = math.ceil(size.x / block_size)
+        num_cols = math.ceil(size.y / block_size)
         blocks = np.empty((num_x_blocks, num_y_blocks), dtype=MazeBlock)
         x = 0
         y = 0
-        for row in range(num_x_blocks):
+        for row in range(num_rows):
             y = 0
-            for col in range(num_x_blocks):
+            for col in range(num_cols):
                 blocks[row][col] = MazeBlock(x, y, block_size, block_size)
                 y += block_size
             x += block_size
         return blocks
+
+    def __choose_random_start(self, blocks: np.ndarray) -> np.ndarray:
+        """
+        Choses a random cell in the first column of a matrix of blocks,
+        and returns the indices of that block.
+        """
+        row = random.randrange(self.__num_rows)
+        return np.array([row, 0])
+
+    def __choose_random_end(self, blocks: np.ndarray) -> np.ndarray:
+        """
+        Choses a random cell in the last column of a matrix of blocks,
+        and returns the indices of that block.
+        """
+        row = random.randrange(self.__num_rows)
+        return np.array([row, self.__num_cols - 1])
+
+
 
 
