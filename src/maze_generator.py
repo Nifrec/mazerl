@@ -118,8 +118,8 @@ class MazeBlock():
         The coordinates are rounded down in case no single middle
         exists.
         """
-        center_x = self.__x + math.floor(self.__width / 2)
-        center_y = self.__y + math.floor(self.__height / 2)
+        center_x = self.__x + math.floor((self.__width - 1) / 2)
+        center_y = self.__y + math.floor((self.__height - 1) / 2)
         return np.array([center_x, center_y])
 
     def get_pos(self) -> Tuple[int]:
