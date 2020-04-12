@@ -61,8 +61,7 @@ class MazeBlockTestCase(unittest.TestCase):
                     has_counterpart = True
                     set_1.remove(line_1)
                     break
-            self.assertTrue(has_counterpart)
-                    
+            self.assertTrue(has_counterpart)                   
 
     def test_set_up_1(self):
         """
@@ -104,6 +103,21 @@ class MazeBlockTestCase(unittest.TestCase):
         print(f"Expected:{expected}, result: {result}")
         self.check_sets_of_lines_equal(expected, result)
 
+    def test_get_center_1(self):
+        block = MazeBlock(10, 10, 11, 11)
+        expected = np.array([15, 15])
+        result = block.get_center()
+        assert np.allclose(expected, result), \
+            f"Expected: {expected}, result: {result}"
+        self.assertTrue(np.allclose(expected, result))
+
+    def test_get_center_2(self):
+        block = MazeBlock(10, 10, 11, 100)
+        expected = np.array([15, 59])
+        result = block.get_center()
+        assert np.allclose(expected, result), \
+            f"Expected: {expected}, result: {result}"
+
 class MazeGeneratorTestCase(unittest.TestCase):
     """
     Since the methods of MazeGenerator are non-deterministic,
@@ -111,10 +125,9 @@ class MazeGeneratorTestCase(unittest.TestCase):
     """
 
     def test_generate_partition(self):
-        gen = MazeGenerator()
         block_size = 10
         size = Size(100, 150)
-
+        gen = MazeGenerator(size, 0, 0)
         result = gen._MazeGenerator__generate_block_partition(size, block_size)
 
         assert(isinstance(result[0][0], MazeBlock))
