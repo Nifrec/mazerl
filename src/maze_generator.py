@@ -54,6 +54,16 @@ class MazeBlock():
                 + f",{self.__height})"
         return output
 
+    def set_up(self, in_direction: Direction, out_direction: Direction) \
+                -> Set[Line]:
+        """
+        Facade method that sets the directions of the path though
+        this MazeBlock and generates walls (Lines) for the other edges.
+        """
+        self.set_direction_in(in_direction)
+        self.set_direction_out(out_direction)
+        return self.generate_walls_where_no_path()
+
     def generate_walls_where_no_path(self) -> Set[Line]:
         """
         Create set of walls that block the edges though which the maze
