@@ -112,6 +112,16 @@ class MazeBlock():
         self.__direction_in = None
         self.__direction_out = None
 
+    def get_center(self) -> np.ndarray:
+        """
+        Returns center coordinates as a 2-element numpy array.
+        The coordinates are rounded down in case no single middle
+        exists.
+        """
+        center_x = self.__x + math.floor(self.__width / 2)
+        center_y = self.__y + math.floor(self.__height / 2)
+        return np.array([center_x, center_y])
+
     def get_pos(self) -> Tuple[int]:
         return self.__x, self.__y
 
@@ -139,13 +149,13 @@ class MazeGenerator():
         """
         Generate a new random maze for the configured settings.
         """
-        start_idx = self.__choose_random_start
-        end_idx = 
+        start_idx = self.__choose_random_start()
+        end_idx = self.__choose_random_end()
         
     def __generate_block_partition(self, size: Size, block_size: Number) \
                 -> np.ndarray:
-        self.__num_rows = math.ceil(size.x / block_size)
-        self.__num_cols = math.ceil(size.y / block_size)
+        self.__num_rows = math.floor(size.x / block_size)
+        self.__num_cols = math.floor(size.y / block_size)
         blocks = np.empty((self.__num_rows, self.__num_cols), dtype=MazeBlock)
         x = 0
         y = 0
@@ -164,12 +174,15 @@ class MazeGenerator():
         for block in np.nditer(self.__blocks):
             block.reset()
 
-    def __choose_random_start(self, blocks: np.ndarray) -> Tuple[int]:
+    def __choose_random_start(self, blocks: np.ndarray) -> np.ndarray:
         """
         Choses a random cell in the first column of a matrix of blocks,
-        and returns the indices of that block.
+        and returns coordinates in the center of that block.
         """
         row = random.randrange(self.__num_rows)
+        col = 0
+        block = self.__blocks[row][0]
+
         return row, 0
 
     def __choose_random_end(self, blocks: np.ndarray) -> Tuple[int]:
