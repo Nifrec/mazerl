@@ -35,6 +35,9 @@ class Line():
     def __str__(self):
         return f"Line ({self.p0}, {self.p1})"
 
+    def __repr__(self):
+        return f"Line({self.p0[0]}, {self.p0[1]}, {self.p1[0]}, {self.p1[1]})"
+
 class Ball():
     """
     Record type for a moving ball, has a position, radius,
