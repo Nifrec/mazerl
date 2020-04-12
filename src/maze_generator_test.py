@@ -118,6 +118,13 @@ class MazeBlockTestCase(unittest.TestCase):
         assert np.allclose(expected, result), \
             f"Expected: {expected}, result: {result}"
 
+    def test_get_center_3(self):
+        block = MazeBlock(0, 0, 1, 100)
+        expected = np.array([0, 49])
+        result = block.get_center()
+        assert np.allclose(expected, result), \
+            f"Expected: {expected}, result: {result}"
+
 class MazeGeneratorTestCase(unittest.TestCase):
     """
     Since the methods of MazeGenerator are non-deterministic,
