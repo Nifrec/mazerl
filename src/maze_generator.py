@@ -149,8 +149,9 @@ class MazeGenerator():
         """
         Generate a new random maze for the configured settings.
         """
-        start_idx = self.__choose_random_start()
-        end_idx = self.__choose_random_end()
+        start_idx = self.__choose_random_start(self.__blocks)
+        end_idx = self.__choose_random_end(self.__blocks)
+        assert False, "TODO: finish and test!"
         
     def __generate_block_partition(self, size: Size, block_size: Number) \
                 -> np.ndarray:
@@ -183,12 +184,15 @@ class MazeGenerator():
         col = 0
         block = self.__blocks[row][0]
 
-        return row, 0
+        return block.get_center()
 
-    def __choose_random_end(self, blocks: np.ndarray) -> Tuple[int]:
+    def __choose_random_end(self, blocks: np.ndarray) -> np.ndarray:
         """
         Choses a random cell in the last column of a matrix of blocks,
-        and returns the indices of that block.
+        and returns coordinates in the center of that block.
         """
         row = random.randrange(self.__num_rows)
-        return row, (self.__num_cols - 1)
+        col = self.__num_cols - 1
+        block = self.__blocks[row][0]
+
+        return block.get_center()
