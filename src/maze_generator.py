@@ -150,9 +150,9 @@ class MazeBlock():
     def get_pos(self) -> Tuple[int]:
         return self.__x, self.__y
 
-class BlockGrid():
+class MazeGrid():
     """
-    Abstract data structure that represents a matrix of blocks.
+    Abstract data structure that represents a matrix of MazeBlocks.
     """
 
     def __init__(self, size: Size, block_size: Number):
@@ -202,7 +202,7 @@ class BlockGrid():
             directions.add(Direction.RIGHT)
         return directions
 
-    def get_at(row: int, col: int) -> MazeBlock:
+    def get_at(self, row: int, col: int) -> MazeBlock:
         return self.__blocks[row][col]
 
     def __reset_blocks(self):
