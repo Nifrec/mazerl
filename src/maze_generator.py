@@ -171,17 +171,17 @@ class MazeGrid():
 
     def __generate_block_partition(self, size: Size, block_size: Number) \
                 -> np.ndarray:
-        self.__num_rows = math.floor(size.x / block_size)
-        self.__num_cols = math.floor(size.y / block_size)
+        self.__num_rows = math.floor(size.y / block_size)
+        self.__num_cols = math.floor(size.x / block_size)
         blocks = np.empty((self.__num_rows, self.__num_cols), dtype=MazeBlock)
         x = 0
         y = 0
         for row in range(self.__num_rows):
-            y = 0
+            x = 0
             for col in range(self.__num_cols):
                 blocks[row, col] = MazeBlock(x, y, block_size, block_size)
-                y += block_size
-            x += block_size
+                x += block_size
+            y += block_size
         return blocks
 
     def __row_exists(self, row: Number):
@@ -202,13 +202,13 @@ class MazeGrid():
         if self.__row_exists(row - 1) \
                 and (self.__blocks[row-1, col].state == BlockState.EMPTY):
             directions.add(Direction.UP)
-        if self.__col_exists(col -1) \
+        if self.__col_exists(col - 1) \
                 and (self.__blocks[row, col-1].state == BlockState.EMPTY):
             directions.add(Direction.LEFT)
         if self.__row_exists(row + 1) \
                 and (self.__blocks[row+1, col].state == BlockState.EMPTY):
             directions.add(Direction.DOWN)
-        if self.__col_exists(col+1) \
+        if self.__col_exists(col + 1) \
                 and (self.__blocks[row, col+1].state == BlockState.EMPTY):
             directions.add(Direction.RIGHT)
         return directions
@@ -269,7 +269,7 @@ class MazeGenerator():
                 to navigate through.
         """
         # +2 because each on-path block may contain 2 1-pixel-broad walls.
-        block_size = radius + 2 + offset
+        block_size = 2*radius + 2 + offset
         self.__grid = MazeGrid(size, block_size)
         self.__size = size
         
@@ -310,7 +310,6 @@ class MazeGenerator():
         # Goal is reached, recursion can terminate
         if (current_block == self.__end):
             return True
-
         out_directions = list(self.__grid.find_available_directions(row, col))
         random.shuffle(out_directions)
         for direction in out_directions:
@@ -324,9 +323,6 @@ class MazeGenerator():
                 # Recursively try out if this path would work out.
                 if self.__set_block_recursively(next_row, next_col):
                     return True
-                # else:
-                #     # The recursion failed, undo the attempt.
-                #     next_block.reset()
             else:
                 continue
         current_block.reset()
