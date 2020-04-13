@@ -180,7 +180,7 @@ class MazeGrid():
         for row in range(self.__num_rows):
             y = 0
             for col in range(self.__num_cols):
-                blocks[row][col] = MazeBlock(x, y, block_size, block_size)
+                blocks[row, col] = MazeBlock(x, y, block_size, block_size)
                 y += block_size
             x += block_size
         return blocks
@@ -201,21 +201,21 @@ class MazeGrid():
         """
         directions = set()
         if self.__row_exists(row - 1) \
-                and (self.__blocks[row-1][col].state == BlockState.EMPTY):
+                and (self.__blocks[row-1, col].state == BlockState.EMPTY):
             directions.add(Direction.UP)
         if self.__col_exists(col -1) \
-                and (self.__blocks[row][col-1].state == BlockState.EMPTY):
+                and (self.__blocks[row, col-1].state == BlockState.EMPTY):
             directions.add(Direction.LEFT)
         if self.__row_exists(row + 1) \
-                and (self.__blocks[row+1][col].state == BlockState.EMPTY):
+                and (self.__blocks[row+1, col].state == BlockState.EMPTY):
             directions.add(Direction.DOWN)
         if self.__col_exists(col+1) \
-                and (self.__blocks[row][col+1].state == BlockState.EMPTY):
+                and (self.__blocks[row, col+1].state == BlockState.EMPTY):
             directions.add(Direction.RIGHT)
         return directions
 
     def get_at(self, row: int, col: int) -> MazeBlock:
-        return self.__blocks[row][col]
+        return self.__blocks[row, col]
 
     def reset_blocks(self):
         """
@@ -231,7 +231,7 @@ class MazeGrid():
         """
         row = random.randrange(self.__num_rows)
         col = 0
-        block = self.__blocks[row][col]
+        block = self.__blocks[row, col]
 
         return block, (row, col)
 
@@ -242,7 +242,7 @@ class MazeGrid():
         """
         row = random.randrange(self.__num_rows)
         col = self.__num_cols - 1
-        block = self.__blocks[row][col]
+        block = self.__blocks[row, col]
 
         return block
 
@@ -280,8 +280,9 @@ class MazeGenerator():
         for block in np.nditer(self.__grid):
             block.generate_walls_where_no_path()
         
-        return MazeLayout(walls, start.get_center(), self.__end.get_center(),
-                self.__size)
+        return MazeLayout(walls, 
+                self.__grid.get_at(start_row, start_col).get_center(),
+                self.__end.get_center(), self.__size)
 
     def __set_block_recursively(self, row: int, col: int) -> bool:
         """
