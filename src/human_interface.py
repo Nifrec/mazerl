@@ -7,7 +7,7 @@ Uses pygame for rendering and input.
 Move the ball with the arrows or WASD, press ESC to quit.
 If the goal is reached the screen becomes green for a second and resets,
 if a wall is hit (i.e. you 'died'), the screen becomes red for a second 
-and resets.
+and resets. Press F1 to generate a new maze.
 
 Author: Lulof Pirée
 """
@@ -22,6 +22,7 @@ import time
 from model import Model, MazeLayout
 from record_types import Size, Line
 from pygame_visualizer import PygameVisualizer
+from maze_generator import MazeGenerator
 
 
 FPS = 30
@@ -32,6 +33,7 @@ RED = pygame.Color(255, 0, 0)
 GREEN = pygame.Color(0, 255, 0)
 GAME_OVER_TIME = 1
 BALL_RAD = 10
+MAZE_OFFSET = 60
 ACC_INCR_BUTTON_PRESS = 0.1
 
 
@@ -39,9 +41,11 @@ class HumanInterface():
 
     def __init__(self, fps: Number, 
             width: Number, height: Number, fullscreen: bool=False):
+        
         pygame.init()
         pygame.display.set_caption("MazeRL Human Interface")
         self.__size = Size(width, height)
+        self.__maze_gen = MazeGenerator(self.__size, BALL_RAD, MAZE_OFFSET)
         self.__screen = pygame.display.set_mode((width, height))
         if fullscreen:
             pygame.display.toggle_fullscreen()
@@ -54,7 +58,7 @@ class HumanInterface():
         #self._screen.fill(backgroundcolor)
         pygame.display.flip()
         self.__model = Model(self.__size, BALL_RAD)
-        self.create_test_maze()
+        self.create_random_maze()
         self.render_model()
         self.run()
 
@@ -84,6 +88,9 @@ class HumanInterface():
             elif (event.type == pygame.KEYDOWN): # If a button is pressed
                 if (event.key == pygame.K_ESCAPE): # User pressed ESC
                     self.__is_running = False
+
+                if (event.key == pygame.K_F1):
+                    self.create_random_maze()
         
         self.process_held_keys()
 
@@ -108,10 +115,10 @@ class HumanInterface():
         self.__model.set_acceleration(0, 0)
         if (hit_wall):
             self.death_screen()
-            self.create_test_maze()
+            self.create_random_maze()
         elif (self.__model.is_ball_at_finish()):
             self.win_screen()
-            self.create_test_maze()
+            self.create_random_maze()
 
     def death_screen(self):
         """
@@ -135,7 +142,11 @@ class HumanInterface():
         surf = self.__model.render(PygameVisualizer)
         self.__screen.blit(surf, (0, 0))
 
-    def create_test_maze(self):
+    def create_random_maze(self):
+        self.__model.reset(self.__maze_gen.generate_maze())
+        pygame.display.flip()
+
+    def __create_test_maze(self):
         """
         Creates a simple hard-coded maze to test the rendering.
         """
@@ -163,7 +174,6 @@ class HumanInterface():
                 Line(200, 400, 500, 400)
                 ])
 
-        print(self.__size.x, self.__size.y)
         start = np.array([300, 300])
         end = np.array([125, 20])
         layout = MazeLayout(lines, start, end, self.__size)
