@@ -20,6 +20,17 @@ class Direction(enum.Enum):
     UP=3
     DOWN=4
 
+    @staticmethod
+    def get_opposide(direction: Direction) -> Direction:
+        if direction == Direction.LEFT:
+            return Direction.RIGHT
+        elif direction == Direction.RIGHT:
+            return Direction.LEFT
+        elif direction == Direction.UP:
+            return Direction.DOWN
+        elif direction == Direction.DOWN:
+            return Direction.UP
+
 class BlockState(enum.Enum):
     # Neither in- nor out-direction set.
     EMPTY = 1
@@ -224,7 +235,7 @@ class MazeGrid():
 
         return block, (row, col)
 
-    def choose_random_end(self, blocks: np.ndarray) 
+    def choose_random_end(self, blocks: np.ndarray) \
             -> Tuple[MazeBlock, Tuple[int]]:
         """
         Choses a random cell in the last column of a matrix of blocks,
@@ -277,22 +288,29 @@ class MazeGenerator():
 
     def __set_block_recursively(self, row: int, col: int) -> bool:
         current_block = self.__grid.get_at(row, col)
+        # Expected that only in-direction of block is set.
+        if (current_block.state == BlockState.SET):
+            return False
+        # Goal is reached, recursion can terminate
+        if (current_block == self.__end):
+            return True
+
         for direction in self.__grid.find_available_directions(row, col):
             current_block.set_direction_out(direction)
-            next_block, next_row, next_col = self.__... todo
-            if not dead end:
-                next_block.set_direction_in
-                if recurse works:
-                    return True
+            next_row, next_col = \
+                self.__map_direction_to_neightbour_indices(direction, row, col)
+            self.__grid.get_at()
+            if not self.__set_block_recursively(next_row, next_col):
+                
         return False
 
     def __map_direction_to_neightbour_indices(self, direction: Direction, 
             row: int, col: int) -> Tuple[int]:
-            """
-            Given the indices of a block in self.__grid, and the direction of
-            the neighbour, finds the indices of the corresponding neighbour
-            in the grid.
-            """
+        """
+        Given the indices of a block in self.__grid, and the direction of
+        the neighbour, finds the indices of the corresponding neighbour
+        in the grid.
+        """
         if (direction == Direction.UP):
             return (row-1, col)
         elif (direction == Direction.LEFT):
