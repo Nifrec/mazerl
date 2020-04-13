@@ -276,6 +276,11 @@ class MazeGenerator():
     def generate_maze(self) -> MazeLayout:
         """
         Generate a new random maze for the configured settings.
+
+        Performs depth-first search on the partitions of the maze,
+        tries to generate a path from the start to the end (after randomly
+        choosing a start- and end-block). At each level, the algorithm randomly
+        chooses one of the available directions to explore next.
         """
         self.__grid.reset_blocks()
         start_row, start_col = self.__grid.choose_random_start_indices()
