@@ -20,16 +20,16 @@ class Direction(enum.Enum):
     UP=3
     DOWN=4
 
-    @staticmethod
-    def get_opposide(direction: Direction) -> Direction:
-        if direction == Direction.LEFT:
-            return Direction.RIGHT
-        elif direction == Direction.RIGHT:
-            return Direction.LEFT
-        elif direction == Direction.UP:
-            return Direction.DOWN
-        elif direction == Direction.DOWN:
-            return Direction.UP
+@staticmethod
+def get_opposide(direction: Direction) -> Direction:
+    if direction == Direction.LEFT:
+        return Direction.RIGHT
+    elif direction == Direction.RIGHT:
+        return Direction.LEFT
+    elif direction == Direction.UP:
+        return Direction.DOWN
+    elif direction == Direction.DOWN:
+        return Direction.UP
 
 class BlockState(enum.Enum):
     # Neither in- nor out-direction set.
@@ -224,10 +224,10 @@ class MazeGrid():
         for block in np.nditer(self.__blocks):
             block.reset()
 
-    def choose_random_start(self) -> Tuple[MazeBlock, Tuple[int]]:
+    def choose_random_start_indices(self) -> Tuple[int]:
         """
         Choses a random cell in the first column of this matrix of blocks,
-        and returns the block of that cell, and the indices of that block.
+        and returns the indices of the block of that cell.
         """
         row = random.randrange(self.__num_rows)
         col = 0
@@ -235,7 +235,7 @@ class MazeGrid():
 
         return block, (row, col)
 
-    def choose_random_end(self) -> MazeBlock:
+    def choose_random_end_block(self) -> MazeBlock:
         """
         Choses a random cell in the last column of this matrix of blocks,
         and returns the block of that cell.
@@ -271,10 +271,8 @@ class MazeGenerator():
         """
         Generate a new random maze for the configured settings.
         """
-        start, start_row, start_col = \
-                self.__grid.choose_random_start()
-        self.__end = self.__grid.choose_random_end()
-        current_block = start
+        start_row, start_col = self.__grid.choose_random_start_indices()
+        self.__end = self.__grid.choose_random_end_block()
         assert self.__set_block_recursively(start_row, start_col), \
                 "-- This should not happen --: maze generation failed"
         
