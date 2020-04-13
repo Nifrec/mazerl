@@ -20,7 +20,6 @@ class Direction(enum.Enum):
     UP=3
     DOWN=4
 
-@staticmethod
 def get_opposide(direction: Direction) -> Direction:
     if direction == Direction.LEFT:
         return Direction.RIGHT
@@ -221,7 +220,7 @@ class MazeGrid():
         """
         Erases all in/out directions stored in all blocks.
         """
-        for block in np.nditer(self.__blocks):
+        for block in self.__iter__():
             block.reset()
 
     def choose_random_start_indices(self) -> Tuple[int]:
@@ -245,6 +244,13 @@ class MazeGrid():
         block = self.__blocks[row, col]
 
         return block
+
+    def __iter__(self) -> MazeBlock:
+        #  for block in np.nditer(self.__blocks, ("refs_ok",)):
+        #      yield block
+        for row in range(self.__num_rows):
+            for col in range(self.__num_cols):
+                yield self.__blocks[row, col]
 
 class MazeGenerator():
 
@@ -271,6 +277,7 @@ class MazeGenerator():
         """
         Generate a new random maze for the configured settings.
         """
+        self.__grid.reset_blocks()
         start_row, start_col = self.__grid.choose_random_start_indices()
         self.__end = self.__grid.choose_random_end_block()
         self.__recurse_size = 0
@@ -279,8 +286,8 @@ class MazeGenerator():
                     + f"after {self.__recurse_size} recurse calls"
         
         walls = set()
-        for block in np.nditer(self.__grid):
-            block.generate_walls_where_no_path()
+        for block in self.__grid:
+            walls = walls.union(block.generate_walls_where_no_path())
         
         return MazeLayout(walls, 
                 self.__grid.get_at(start_row, start_col).get_center(),
@@ -292,6 +299,8 @@ class MazeGenerator():
         path from the block at self.__grid.get_at(row, col) to
         self.__end. Returns True if a path has been found,
         and False if no path exists.
+        Modifies self.__grid(), but undoes all changes in case path
+        creation fails.
         """
         self.__recurse_size += 1
         current_block = self.__grid.get_at(row, col)
@@ -302,8 +311,7 @@ class MazeGenerator():
         if (current_block == self.__end):
             return True
 
-        out_directions = \
-                list(self.__grid.find_available_directions(row, col))
+        out_directions = list(self.__grid.find_available_directions(row, col))
         random.shuffle(out_directions)
         for direction in out_directions:
             current_block.set_direction_out(direction)
@@ -311,17 +319,17 @@ class MazeGenerator():
                 self.__map_direction_to_neightbour_indices(direction, row, col)
             next_block = self.__grid.get_at(next_row, next_col)
             # If the next block is a potential next part of the path, try it.
-            if (next_block == BlockState.EMPTY):
-                next_block.set_direction_in(Direction.get_opposide(direction))
+            if (next_block.state == BlockState.EMPTY):
+                next_block.set_direction_in(get_opposide(direction))
                 # Recursively try out if this path would work out.
                 if self.__set_block_recursively(next_row, next_col):
                     return True
-                else:
-                    # The recursion failed, undo the attempt.
-                    next_block.reset()
+                # else:
+                #     # The recursion failed, undo the attempt.
+                #     next_block.reset()
             else:
                 continue
-            
+        current_block.reset()
         return False
 
     def __map_direction_to_neightbour_indices(self, direction: Direction, 
