@@ -11,7 +11,8 @@ from typing import Set
 # Local imports
 from model import MazeLayout
 from record_types import Line, Size
-from maze_generator import Direction, MazeBlock, MazeGrid, MazeGenerator
+from maze_generator import Direction, BlockState, MazeBlock, MazeGrid, \
+        MazeGenerator
 
 class MazeBlockTestCase(unittest.TestCase):
 
@@ -160,6 +161,57 @@ class MazeGridTestCase(unittest.TestCase):
         self.assertFalse(grid._MazeGrid__col_exists(15))
         self.assertFalse(grid._MazeGrid__col_exists(-1))
         self.assertTrue(grid._MazeGrid__col_exists(14))
+
+    def test_find_available_directions_1(self):
+        """
+        Corner case: no direction available.
+        """
+        block_size = 10
+        size = Size(100, 150)
+        grid = MazeGrid(size, block_size)
+        # Top neighbour is in state PARIAL -- only IN
+        grid.get_at(0, 1).set_direction_in(Direction.DOWN)
+        assert(grid.get_at(0, 1).state == BlockState.PARIAL)
+        # Bottom neighbour is in state PARIAL -- only out
+        grid.get_at(2, 1).set_direction_out(Direction.LEFT)
+        assert(grid.get_at(2, 1).state == BlockState.PARIAL)
+        # Left neighbour
+        grid.get_at(1, 0).set_direction_out(Direction.UP)
+        grid.get_at(1, 0).set_direction_in(Direction.DOWN)
+        assert(grid.get_at(1, 0).state == BlockState.SET)
+        # Right neighbour
+        grid.get_at(1, 2).set_direction_in(Direction.UP)
+        grid.get_at(1, 2).set_direction_out(Direction.DOWN)
+        assert(grid.get_at(1, 2).state == BlockState.SET)
+        
+        self.assertTrue(len(grid.find_available_directions(1, 1)) == 0,
+                "Expected empty set but got " \
+                + f"{grid.find_available_directions(1, 1)}")
+
+    def test_find_available_directions_2(self):
+        """
+        Base case: 3 directions available.
+        """
+        block_size = 10
+        size = Size(100, 150)
+        grid = MazeGrid(size, block_size)
+        # Top neighbour
+        assert(grid.get_at(0, 1).state == BlockState.EMPTY)
+        # Bottom neighbour
+        assert(grid.get_at(2, 1).state == BlockState.EMPTY)
+        # Left neighbour
+        assert(grid.get_at(1, 0).state == BlockState.EMPTY)
+
+        # Right neighbour
+        grid.get_at(1, 2).set_direction_in(Direction.LEFT)
+        grid.get_at(1, 2).set_direction_out(Direction.RIGHT)
+        assert(grid.get_at(1, 2).state == BlockState.SET)
+        
+        expected = set([Direction.LEFT, Direction.UP, Direction.DOWN])
+        result = grid.find_available_directions(1, 1)
+        self.assertSetEqual(expected, result)
+
+
 
 
 class MazeGeneratorTestCase(unittest.TestCase):
