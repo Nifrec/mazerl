@@ -177,7 +177,7 @@ class MazeGrid():
         return (row >= 0) and (row < self.__num_rows)
 
     def __col_exists(self, col: Number):
-        return (col >= 0) and (col < self.__num_col)
+        return (col >= 0) and (col < self.__num_cols)
 
     def find_available_directions(self, row, col):
         """
