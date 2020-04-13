@@ -212,18 +212,20 @@ class MazeGrid():
         for block in np.nditer(self.__blocks):
             block.reset()
 
-    def choose_random_start(self, blocks: np.ndarray) -> MazeBlock:
+    def choose_random_start(self, blocks: np.ndarray) \
+                -> Tuple[MazeBlock, Tuple[int]]:
         """
         Choses a random cell in the first column of a matrix of blocks,
-        and returns the block of that cell.
+        and returns the block of that cell, and the indices of that block.
         """
         row = random.randrange(self.__num_rows)
         col = 0
         block = self.__blocks[row][col]
 
-        return block
+        return block, (row, col)
 
-    def choose_random_end(self, blocks: np.ndarray) -> MazeBlock:
+    def choose_random_end(self, blocks: np.ndarray) 
+            -> Tuple[MazeBlock, Tuple[int]]:
         """
         Choses a random cell in the last column of a matrix of blocks,
         and returns the block of that cell.
@@ -232,7 +234,7 @@ class MazeGrid():
         col = self.__num_cols - 1
         block = self.__blocks[row][col]
 
-        return block
+        return block, (row, col)
 
 class MazeGenerator():
 
@@ -252,36 +254,50 @@ class MazeGenerator():
         """
         # +2 because each on-path block may contain 2 1-pixel-broad walls.
         block_size = radius + 2 + offset
-        self.__blocks = self.__generate_block_partition(size, block_size)
+        self.__grid = MazeGrid(size, block_size)
         self.__size = size
         
     def generate_maze(self) -> MazeLayout:
         """
         Generate a new random maze for the configured settings.
         """
-        start = self.__choose_random_start(self.__blocks)
-        end = self.__choose_random_end(self.__blocks)
+        start, start_row, start_col = \
+                self.__grid.choose_random_start(self.__blocks)
+        end = self.__grid.choose_random_end(self.__blocks)
         current_block = start
-        while (current_block != end):
-            dirs = self.__find_available_directions(current_block)
-            self.__set_random_directions(current_block, dirs)
-            next_block = meh
+        assert self.__set_block_recursively(self, start_row, start_col), \
+                "-- This should not happen --: maze generation failed"
         
-        # walls = set()
-        # for block in np.nditer(self.__blocks):
-        #     block.generate_walls_where_no_path()
+        walls = set()
+        for block in np.nditer(self.__blocks):
+            block.generate_walls_where_no_path()
         
-        # return MazeLayout(walls, start.get_center(), end.get_center(),
-        #         self.__size)
+        return MazeLayout(walls, start.get_center(), end.get_center(),
+                self.__size)
 
-        assert False, "TODO: finish and test!"
+    def __set_block_recursively(self, row: int, col: int) -> bool:
+        current_block = self.__grid.get_at(row, col)
+        for direction in self.__grid.find_available_directions(row, col):
+            current_block.set_direction_out(direction)
+            next_block, next_row, next_col = self.__... todo
+            if not dead end:
+                next_block.set_direction_in
+                if recurse works:
+                    return True
+        return False
 
-    # def __set_block_recursively(self, row: int, col: int) -> bool:
-    #     current_block = self.__blocks[row][col]
-    #     for direction in self.__find_available_directions():
-    #         current_block.set_direction_out
-    #         if not dead end:
-    #             next_block.set_direction_in
-    #             if recurse works:
-    #                 return True
-    #     return False
+    def __map_direction_to_neightbour_indices(self, direction: Direction, 
+            row: int, col: int) -> Tuple[int]:
+            """
+            Given the indices of a block in self.__grid, and the direction of
+            the neighbour, finds the indices of the corresponding neighbour
+            in the grid.
+            """
+        if (direction == Direction.UP):
+            return (row-1, col)
+        elif (direction == Direction.LEFT):
+            return (row, col-1)
+        elif (direction == Direction.DOWN):
+            return (row + 1, col)
+        elif (direction == Direction.RIGHT):
+            return (row, col+1)
