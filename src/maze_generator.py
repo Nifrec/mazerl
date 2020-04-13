@@ -275,17 +275,24 @@ class MazeGenerator():
                 self.__grid.choose_random_start()
         self.__end = self.__grid.choose_random_end()
         current_block = start
-        assert self.__set_block_recursively(self, start_row, start_col), \
+        assert self.__set_block_recursively(start_row, start_col), \
                 "-- This should not happen --: maze generation failed"
         
         walls = set()
-        for block in np.nditer(self.__blocks):
+        for block in np.nditer(self.__grid):
             block.generate_walls_where_no_path()
         
-        return MazeLayout(walls, start.get_center(), end.get_center(),
+        return MazeLayout(walls, start.get_center(), self.__end.get_center(),
                 self.__size)
 
     def __set_block_recursively(self, row: int, col: int) -> bool:
+        """
+        Sets the directions of blocks to form a non-overlapping
+        path from the block at self.__grid.get_at(row, col) to
+        self.__end. Returns True if a path has been found,
+        and False if no path exists.
+        """
+
         current_block = self.__grid.get_at(row, col)
         # Expected that only in-direction of block is set.
         if (current_block.state == BlockState.SET):
@@ -299,16 +306,18 @@ class MazeGenerator():
             next_row, next_col = \
                 self.__map_direction_to_neightbour_indices(direction, row, col)
             next_block = self.__grid.get_at(next_row, next_col)
+            # If the next block is a potential next part of the path, try it.
             if (next_block == Direction.EMPTY):
                 next_block.set_direction_in(Direction.get_opposide(direction))
+                # Recursively try out if this path would work out.
                 if self.__set_block_recursively(next_row, next_col):
                     return True
                 else:
+                    # The recursion failed, undo the attempt.
                     next_block.reset()
             else:
                 continue
             
-                
         return False
 
     def __map_direction_to_neightbour_indices(self, direction: Direction, 
