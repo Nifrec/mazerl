@@ -233,7 +233,7 @@ class MazeGrid():
         col = 0
         block = self.__blocks[row, col]
 
-        return block, (row, col)
+        return row, col
 
     def choose_random_end_block(self) -> MazeBlock:
         """
@@ -273,8 +273,10 @@ class MazeGenerator():
         """
         start_row, start_col = self.__grid.choose_random_start_indices()
         self.__end = self.__grid.choose_random_end_block()
+        self.__recurse_size = 0
         assert self.__set_block_recursively(start_row, start_col), \
-                "-- This should not happen --: maze generation failed"
+                "-- This should not happen --: maze generation failed" \
+                    + f"after {self.__recurse_size} recurse calls"
         
         walls = set()
         for block in np.nditer(self.__grid):
@@ -291,7 +293,7 @@ class MazeGenerator():
         self.__end. Returns True if a path has been found,
         and False if no path exists.
         """
-
+        self.__recurse_size += 1
         current_block = self.__grid.get_at(row, col)
         # Expected that only in-direction of block is set.
         if (current_block.state == BlockState.SET):
@@ -300,13 +302,16 @@ class MazeGenerator():
         if (current_block == self.__end):
             return True
 
-        for direction in self.__grid.find_available_directions(row, col):
+        out_directions = \
+                list(self.__grid.find_available_directions(row, col))
+        random.shuffle(out_directions)
+        for direction in out_directions:
             current_block.set_direction_out(direction)
             next_row, next_col = \
                 self.__map_direction_to_neightbour_indices(direction, row, col)
             next_block = self.__grid.get_at(next_row, next_col)
             # If the next block is a potential next part of the path, try it.
-            if (next_block == Direction.EMPTY):
+            if (next_block == BlockState.EMPTY):
                 next_block.set_direction_in(Direction.get_opposide(direction))
                 # Recursively try out if this path would work out.
                 if self.__set_block_recursively(next_row, next_col):
