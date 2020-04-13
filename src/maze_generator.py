@@ -147,6 +147,7 @@ class MazeBlock():
         """
         self.__direction_in = None
         self.__direction_out = None
+        self.state = BlockState.EMPTY
 
     def get_center(self) -> np.ndarray:
         """
@@ -223,10 +224,9 @@ class MazeGrid():
         for block in np.nditer(self.__blocks):
             block.reset()
 
-    def choose_random_start(self, blocks: np.ndarray) \
-                -> Tuple[MazeBlock, Tuple[int]]:
+    def choose_random_start(self) -> Tuple[MazeBlock, Tuple[int]]:
         """
-        Choses a random cell in the first column of a matrix of blocks,
+        Choses a random cell in the first column of this matrix of blocks,
         and returns the block of that cell, and the indices of that block.
         """
         row = random.randrange(self.__num_rows)
@@ -235,17 +235,16 @@ class MazeGrid():
 
         return block, (row, col)
 
-    def choose_random_end(self, blocks: np.ndarray) \
-            -> Tuple[MazeBlock, Tuple[int]]:
+    def choose_random_end(self) -> MazeBlock:
         """
-        Choses a random cell in the last column of a matrix of blocks,
+        Choses a random cell in the last column of this matrix of blocks,
         and returns the block of that cell.
         """
         row = random.randrange(self.__num_rows)
         col = self.__num_cols - 1
         block = self.__blocks[row][col]
 
-        return block, (row, col)
+        return block
 
 class MazeGenerator():
 
@@ -273,8 +272,8 @@ class MazeGenerator():
         Generate a new random maze for the configured settings.
         """
         start, start_row, start_col = \
-                self.__grid.choose_random_start(self.__blocks)
-        end = self.__grid.choose_random_end(self.__blocks)
+                self.__grid.choose_random_start()
+        self.__end = self.__grid.choose_random_end()
         current_block = start
         assert self.__set_block_recursively(self, start_row, start_col), \
                 "-- This should not happen --: maze generation failed"
@@ -299,8 +298,16 @@ class MazeGenerator():
             current_block.set_direction_out(direction)
             next_row, next_col = \
                 self.__map_direction_to_neightbour_indices(direction, row, col)
-            self.__grid.get_at()
-            if not self.__set_block_recursively(next_row, next_col):
+            next_block = self.__grid.get_at(next_row, next_col)
+            if (next_block == Direction.EMPTY):
+                next_block.set_direction_in(Direction.get_opposide(direction))
+                if self.__set_block_recursively(next_row, next_col):
+                    return True
+                else:
+                    next_block.reset()
+            else:
+                continue
+            
                 
         return False
 
