@@ -205,7 +205,7 @@ class MazeGrid():
     def get_at(self, row: int, col: int) -> MazeBlock:
         return self.__blocks[row][col]
 
-    def __reset_blocks(self):
+    def reset_blocks(self):
         """
         Erases all in/out directions stored in all blocks.
         """
