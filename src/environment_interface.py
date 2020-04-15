@@ -86,6 +86,9 @@ class Environment():
 
     def reset(self) -> np.ndarray:
         """
+        Generates a new maze and sets the ball at the starting position with
+        0 velocity.
+        
         Returns:
             * observation: 3D numpy int-type ndarray, 
                     RGB representation of reached state (screenshot).
