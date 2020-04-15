@@ -53,6 +53,7 @@ class Environment():
         Returns:
             * observation: 3D numpy int-type ndarray, 
                     RGB representation of reached state (screenshot).
+                    (shape: channel(=3) x width x heigth)
             * reward: Number, rewards obtained for the given action.
             * done: bool, whether the reached state is the final state of
                     an episode.
@@ -66,7 +67,6 @@ class Environment():
         won = self.__model.is_ball_at_finish()
         reward = self.__compute_reward(died, won)
         done = died or won
-        print(f"died: {died}, won: {won}")
         return self.__create_observation_array(), reward, done
 
     def __compute_reward(self, died: bool, won: bool) -> Number:
@@ -85,6 +85,12 @@ class Environment():
         return np.array([red, green, blue])
 
     def reset(self) -> np.ndarray:
+        """
+        Returns:
+            * observation: 3D numpy int-type ndarray, 
+                    RGB representation of reached state (screenshot).
+                    (shape: channel(=3) x width x heigth)
+        """
         self.__model.reset(self.__generator.generate_maze())
         return self.__create_observation_array()
 
