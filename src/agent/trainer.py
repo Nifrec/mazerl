@@ -38,7 +38,7 @@ class Trainer:
     Class for training, saving and executing a DDPG or TD3 agent.
     """
 
-    def __init__(self, hyperparameters):
+    def __init__(self, hyperparameters, agent: Agent, logger: Logger):
         """
         Initialize the DDPG training algorithm, set up Gym environment,
         create file with setup info.
@@ -54,27 +54,14 @@ class Trainer:
         self.env = hyperparameters.env
         self.mode = hyperparameters.mode
         self.state_size = len(self.env.reset())
-        self.logger = None
+        self.__agent = agent
+        self.__logger = logger
         self.training_is_set_up = False
 
         # Prefer CUDA (=GPU), which is normally faster.
         self.device = \
                 torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.__create_agent()
-        
-    def __create_agent(self):
-        """
-        Sets up agent that trains according to DDPG ot TD3
-        depending on self.mode.
-        """
-        if (self.mode == "TD3"):
-            self.agent = TD3Agent(self.hyperparameters, self.device,
-                    self.state_size, self.hyperparameters.save_dir)
-        elif (self.mode == "DDPG"):
-            self.agent = Agent(self.hyperparameters, self.device, 
-                    self.state_size, self.hyperparameters.save_dir)
-        else:
-            raise ValueError(self.__class__.__name__ + "invalid mode")
 
     def train(self):
         if not self.training_is_set_up:
@@ -113,7 +100,7 @@ class Trainer:
                 if (replay_memory.can_sample(self.hyperparameters.batch_size)):
                     batch = replay_memory.sample(
                             self.hyperparameters.batch_size)
-                    self.update_agent(episode, batch)
+                    self.__update_agent(episode, batch)
 
                 if (done.item()):
                     print(f"Agent reached goal in episode {episode}",
@@ -125,7 +112,7 @@ class Trainer:
             self.__process_training_data(episode, rewards_per_episode,
                     episode_rewards)
 
-        self.logger.close_files()
+        self.__logger.close_files()
         # Otherwise may end up overwriting previous train run-data
         self.training_is_set_up = False
 
@@ -146,15 +133,12 @@ class Trainer:
 
         return action
 
-    def update_agent(self, episode, batch):
+    def __update_agent(self, episode, batch):
         critic_loss, actor_loss = self.agent.update(batch, episode)
         if self.logger is not None:
             self.logger.push_critic_loss(critic_loss)
             if actor_loss is not None:
                 self.logger.push_actor_loss(actor_loss)
-
-    def sample_batch(self, replay_memory):     
-        return replay_memory.sample(self.hyperparameters.batch_size)
 
     def __process_training_data(self, episode, rewards_per_episode,
             episode_rewards):
@@ -237,8 +221,3 @@ class Trainer:
         make_setup_info_file(self.hyperparameters)\
         
         self.training_is_set_up = True
-
-    def attach_logger(self, logger):
-        assert isinstance(logger, Logger)
-
-        self.logger = logger
