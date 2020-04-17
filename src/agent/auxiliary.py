@@ -13,7 +13,7 @@ import collections
 # This is a class not an instance!
 # See main.py for example use and more explanation.
 HyperparameterTuple = collections.namedtuple("HyperparameterTuple", 
-                                 ["env_name", "mode", "device",
+                                 ["env", "mode", "device",
                                   "discount_rate", "learning_rate_critic",
                                   "learning_rate_actor",
                                   "exploration_noise_std",
