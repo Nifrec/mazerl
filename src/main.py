@@ -10,22 +10,31 @@ Author: Lulof Pirée
 """
 import argparse
 import os
-import settings
-
-def start_training():
-    path_to_main = os.path.dirname(__file__)
-    checkpoint_dir = os.path.join(path_to_main, settings.CHECKPOINT_TOP_DIR_NAME)
-    if not os.path.exists(checkpoint_dir):
-        print("Creating checkpint folder:\n" + checkpoint_dir)
-        os.mkdir(checkpoint_dir)
+import start_training
+import enum
 
 COMMANDS = ("human", "train", "load")
+class Environments(enum.Enum):
+    maze = 1
+    lunarlander = 2
+    
+ENVIRONMENTS = ("gym-lunarlander", "maze")
+HELP_COMMANDS = \
+    """
+    Function of the program to launch:
+    * human: launches interactive maze with live keyboard input.
+    * train: create a new agent and start training it.
+    * load: load a checkpoint directory of a previously trained agent.
+    """
 parser = argparse.ArgumentParser()
 parser.add_argument("command", choices=COMMANDS, 
-        help="Function of the program to launch")
+        help=HELP_COMMANDS)
 parser.add_argument("-d", "--checkpoint-directory", required=False, 
         help="path to folder of saved agent (in case relevant)",
         metavar="path", dest="checkpoint_dir")
+parser.add_argument("-e", "--environment", required=False, 
+        help="environment to use for training (default: maze)",
+        choices=ENVIRONMENTS, default="maze")
 args = parser.parse_args()
 
 if (args.command == "human"):
@@ -33,7 +42,11 @@ if (args.command == "human"):
     HumanInterface()
 elif (args.command == "train"):
     print("Sorry, this feature is still WIP")
-    start_training()
+    if args.environment == "maze":
+        start_training.start_training(Environments.maze)
+    elif args.environment == "gym-lunarlander":
+        start_training.start_training(Environments.lunarlander)
+
 elif (args.command == "load"):
     print(args.checkpoint_dir)
     print("Sorry, this feature is still WIP")
