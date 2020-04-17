@@ -1,7 +1,7 @@
 """
-Helper functions of the DDPG/TD3 implementation 
-by Lulof Pirée (Nifrec) (student 1363638 at the TU/e)
-for the Honors Academy AI track.
+Helper functions of the DDPG/TD3 implementation.
+
+Author: Lulof Pirée (Nifrec).
 """
 import matplotlib.pyplot as plt
 import torch
