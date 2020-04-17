@@ -30,7 +30,7 @@ from .auxiliary import compute_moving_average, \
         plot_reward_and_moving_average, clip,\
         setup_save_dir, make_setup_info_file
 from .logger import Logger
-from .agent import Agent
+from .agent_class import Agent
 from .td3_agent import TD3Agent
 
 class Trainer:
@@ -56,18 +56,12 @@ class Trainer:
         self.state_size = len(self.env.reset())
         self.__agent = agent
         self.__logger = logger
-        self.training_is_set_up = False
 
         # Prefer CUDA (=GPU), which is normally faster.
         self.device = \
                 torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.__create_agent()
 
     def train(self):
-        if not self.training_is_set_up:
-            raise RuntimeError(self.__class__.__name__ + ".train(): please "
-                    + "set up training with " + self.__class__.__name__ 
-                    + ".setup_train_run() first" )
 
         replay_memory = ReplayMemory(self.hyperparameters.memory_capacity)
         rewards_per_episode = [] # For plot
@@ -113,8 +107,6 @@ class Trainer:
                     episode_rewards)
 
         self.__logger.close_files()
-        # Otherwise may end up overwriting previous train run-data
-        self.training_is_set_up = False
 
     def __choose_action(self, state, episode):
         """
@@ -207,17 +199,3 @@ class Trainer:
         # Also render final state after last action
         self.env.render()
         print("Demo completed")
-
-    def setup_train_run(self):
-        """
-        Attaches a logger to log training data and creates
-        a directory to save generated data 
-        (parameters and performance stats) to.
-        """
-        # Make directory to store all data and log the hyperparameters.
-        print(f"Initialising {self.hyperparameters.mode} with"
-                + f"self.hyperparameters: {self.hyperparameters}")
-        setup_save_dir(self.hyperparameters.save_dir)
-        make_setup_info_file(self.hyperparameters)\
-        
-        self.training_is_set_up = True

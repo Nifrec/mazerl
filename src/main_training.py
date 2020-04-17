@@ -9,10 +9,12 @@ import torch
 import gym
 import enum
 # Local imports
-from agent.auxiliary import HyperparameterTuple, get_timestamp
+from agent.auxiliary import HyperparameterTuple, get_timestamp, setup_save_dir,\
+        make_setup_info_file
 from maze.environment_interface import Environment as MazeEnv
 from agent.trainer import Trainer
 from agent.logger import Logger
+from agent.agent_class import Agent
 import settings
 
 class Environments(enum.Enum):
@@ -21,16 +23,22 @@ class Environments(enum.Enum):
 
 def start_training(env: Environments):
     checkpoint_dir = __create_checkpoint_dir_if_needed()
+    hyperparameters = __create_hyperparameters(checkpoint_dir, env)    
+    __create_run_directory(hyperparameters)
+    agent = Agent
     env = __create_environment(env)
-    hyperparameters = __create_hyperparameters(checkpoint_dir, env)
-    
-    trainer = Trainer(hyperparameters)
-    trainer.setup_train_run()
     logger = Logger(hyperparameters)
-    trainer.attach_logger(logger)
+    trainer = Trainer(hyperparameters, logger, agent)
+    
     trainer.train()
     
 def __create_checkpoint_dir_if_needed() -> str:
+    """
+    Creates the directory that holds the subdirectories of each
+    recorded train run (if it does not exist already).
+    Always returns the directory in which checkpoints directories
+    should be stored.
+    """
     path_to_here = os.path.dirname(__file__)
     checkpoint_dir = os.path.join(path_to_here, 
             settings.CHECKPOINT_TOP_DIR_NAME)
@@ -39,6 +47,16 @@ def __create_checkpoint_dir_if_needed() -> str:
         os.mkdir(checkpoint_dir)
     return checkpoint_dir
 
+def __create_run_directory(hyperparameters: HyperparameterTuple):
+    """
+    Creates a directory in the checkpoints directory for this run.
+    Here generated data such as parameters and performance stats will be logged.
+    """
+    print(f"Initialising {hyperparameters.mode} with"
+            + f"self.hyperparameters: {hyperparameters}")
+    setup_save_dir(hyperparameters.save_dir)
+    make_setup_info_file(hyperparameters)\
+
 def __create_environment(env_name: Environments) -> "Gym-like environment":
     if (env_name == Environments.lunarlander):
         return gym.make("LunarLanderContinuous-v2")
@@ -46,6 +64,17 @@ def __create_environment(env_name: Environments) -> "Gym-like environment":
         return MazeEnv()
     else:
         raise ValueError(f"Invalid environment name given:'{env_name}''")
+
+def __create_agent(self) -> Agent:
+    assert False, "WIP"
+    if (self.mode == "TD3"):
+        self.agent = TD3Agent(self.hyperparameters, self.device,
+                self.state_size, self.hyperparameters.save_dir)
+    elif (self.mode == "DDPG"):
+        self.agent = Agent(self.hyperparameters, self.device, 
+                self.state_size, self.hyperparameters.save_dir)
+    else:
+        raise ValueError(self.__class__.__name__ + "invalid mode")
 
 def __create_hyperparameters(checkpint_dir: str, env:"Gym-like environment") \
         -> HyperparameterTuple:
