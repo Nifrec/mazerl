@@ -8,7 +8,7 @@ import abc
 from typing import Any, Set, Iterable
 from numbers import Number
 # Local imports
-from record_types import Ball, Line, Size
+from maze.record_types import Ball, Line, Size
 
 class Visualizer(abc.ABC):
     """

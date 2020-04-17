@@ -11,8 +11,8 @@ import math
 import numpy as np
 import random
 # Local imports
-from model import MazeLayout
-from record_types import Line, Size
+from maze.model import MazeLayout
+from maze.record_types import Line, Size
 
 class Direction(enum.Enum):
     LEFT=1

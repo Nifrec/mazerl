@@ -10,9 +10,9 @@ from typing import Any
 import numpy as np
 import enum
 # Local imports
-import distances as D
-from record_types import Size, Line, Ball
-from abstract_visualizer import Visualizer
+import maze.distances as D
+from maze.record_types import Size, Line, Ball
+from maze.abstract_visualizer import Visualizer
 
 class MazeLayout():
     """
