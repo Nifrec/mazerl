@@ -146,7 +146,6 @@ def setup_save_dir(directory_name):
 
 def make_setup_info_file(hyperparameters):
     f = open(os.path.join(hyperparameters.save_dir, "setup_info.txt"), "w+")
-    f.write(hyperparameters.env_name + "\n")
     f.write(str(hyperparameters))
     f.close()
 

@@ -7,21 +7,27 @@ Author: Lulof Pirée
 import os
 import torch
 import gym
+import enum
 # Local imports
 from agent.auxiliary import HyperparameterTuple, get_timestamp
-from maze.environment_interface import Environment
+from maze.environment_interface import Environment as MazeEnv
 from agent.trainer import Trainer
+from agent.logger import Logger
 import settings
-from main import Environments
+
+class Environments(enum.Enum):
+    maze = 1
+    lunarlander = 2
 
 def start_training(env: Environments):
     checkpoint_dir = __create_checkpoint_dir_if_needed()
     env = __create_environment(env)
-    hyperparams = __create_hyperparameters(checkpoint_dir, env)
-    logger = None
-    print("TODO: add logger!")
-    trainer = Trainer()
+    hyperparameters = __create_hyperparameters(checkpoint_dir, env)
+    
+    trainer = Trainer(hyperparameters)
     trainer.setup_train_run()
+    logger = Logger(hyperparameters)
+    trainer.attach_logger(logger)
     trainer.train()
     
 def __create_checkpoint_dir_if_needed() -> str:
@@ -33,11 +39,11 @@ def __create_checkpoint_dir_if_needed() -> str:
         os.mkdir(checkpoint_dir)
     return checkpoint_dir
 
-def __create_environment(env_name: str) -> "Gym-like environment":
-    if (env_name == "gym-lunarlander"):
+def __create_environment(env_name: Environments) -> "Gym-like environment":
+    if (env_name == Environments.lunarlander):
         return gym.make("LunarLanderContinuous-v2")
-    elif (env_name == "maze"):
-        return Environment()
+    elif (env_name == Environments.maze):
+        return MazeEnv()
     else:
         raise ValueError(f"Invalid environment name given:'{env_name}''")
 

@@ -22,16 +22,16 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from network import Network
-from replay_memory import ReplayMemory
-from auxiliary import Experience, HyperparameterTuple
-from auxiliary import compute_moving_average, \
+from .network import Network
+from .replay_memory import ReplayMemory
+from .auxiliary import Experience, HyperparameterTuple
+from .auxiliary import compute_moving_average, \
         compute_moving_average_when_enough_values, \
         plot_reward_and_moving_average, clip,\
         setup_save_dir, make_setup_info_file
-from logger import Logger
-import agent
-import td3_agent
+from .logger import Logger
+from .agent import Agent
+from .td3_agent import TD3Agent
 
 class Trainer:
     """
@@ -68,10 +68,10 @@ class Trainer:
         depending on self.mode.
         """
         if (self.mode == "TD3"):
-            self.agent = td3_agent.TD3Agent(self.hyperparameters, self.device,
+            self.agent = TD3Agent(self.hyperparameters, self.device,
                     self.state_size, self.hyperparameters.save_dir)
         elif (self.mode == "DDPG"):
-            self.agent = agent.Agent(self.hyperparameters, self.device, 
+            self.agent = Agent(self.hyperparameters, self.device, 
                     self.state_size, self.hyperparameters.save_dir)
         else:
             raise ValueError(self.__class__.__name__ + "invalid mode")

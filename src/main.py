@@ -9,14 +9,9 @@ or load a trained agent.
 Author: Lulof Pirée
 """
 import argparse
-import os
-import start_training
-import enum
+import main_training
 
 COMMANDS = ("human", "train", "load")
-class Environments(enum.Enum):
-    maze = 1
-    lunarlander = 2
     
 ENVIRONMENTS = ("gym-lunarlander", "maze")
 HELP_COMMANDS = \
@@ -43,9 +38,9 @@ if (args.command == "human"):
 elif (args.command == "train"):
     print("Sorry, this feature is still WIP")
     if args.environment == "maze":
-        start_training.start_training(Environments.maze)
+        main_training.start_training(main_training.Environments.maze)
     elif args.environment == "gym-lunarlander":
-        start_training.start_training(Environments.lunarlander)
+        main_training.start_training(main_training.Environments.lunarlander)
 
 elif (args.command == "load"):
     print(args.checkpoint_dir)
