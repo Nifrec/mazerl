@@ -4,7 +4,7 @@ Lulof Pirée (Nifrec)
 """
 import torch
 import numpy as np
-from .agent import Agent
+from .agent_class import Agent
 from .twin_network import TwinNetwork
 
 class TD3Agent(Agent):
