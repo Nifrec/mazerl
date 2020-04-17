@@ -7,7 +7,7 @@ Uses pygame for rendering and input.
 Move the ball with the arrows or WASD, press ESC to quit.
 If the goal is reached the screen becomes green for a second and resets,
 if a wall is hit (i.e. you 'died'), the screen becomes red for a second 
-and resets. Press F1 to generate a new maze.
+and resets. Press F1 to generate a new .
 
 Author: Lulof Pirée
 """
@@ -19,10 +19,10 @@ import pygame
 import numpy as np
 import time
 
-from maze.model import Model, MazeLayout
-from maze.record_types import Size, Line
-from maze.pygame_visualizer import PygameVisualizer
-from maze.maze_generator import MazeGenerator
+from .model import Model, MazeLayout
+from .record_types import Size, Line
+from .pygame_visualizer import PygameVisualizer
+from .maze_generator import MazeGenerator
 
 
 FPS = 30

@@ -13,7 +13,7 @@ import numpy as np
 from numpy import linalg as LA
 from numbers import Number
 # Local imports:
-from maze.record_types import Size, Line, Ball
+from .record_types import Size, Line, Ball
 
 class Orientation(enum.Enum):
     CLOCKWISE = 1

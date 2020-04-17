@@ -10,9 +10,10 @@ from typing import Any
 import numpy as np
 import enum
 # Local imports
-import maze.distances as D
-from maze.record_types import Size, Line, Ball
-from maze.abstract_visualizer import Visualizer
+from .distances import euclidean_dist, dist_line_to_line, \
+        dist_point_line_segment,is_ball_in_rect
+from .record_types import Size, Line, Ball
+from .abstract_visualizer import Visualizer
 
 class MazeLayout():
     """
@@ -24,8 +25,8 @@ class MazeLayout():
             end_point: np.ndarray, size: Size):
         """
         Arguments:
-        * lines: set of Line objects, walls of the maze.
-        * start_point: [x, y] array, starting coordinates of player in maze.
+        * lines: set of Line objects, walls of the .
+        * start_point: [x, y] array, starting coordinates of player in .
         * end_point: [x, y] array, exit coordinates of maze (i.e. the player's
                 goal)
 
@@ -71,7 +72,7 @@ class MazeLayout():
                 + f": Invalid input: datapoint {point} beyond layout size.")
 
     def is_ball_at_finish(self, ball: Ball):
-        return (D.euclidean_dist(self.__end, ball.pos) <= ball.rad)
+        return (euclidean_dist(self.__end, ball.pos) <= ball.rad)
 
     def does_ball_hit_wall(self, ball):
         assert(isinstance(ball, Ball))
@@ -89,7 +90,7 @@ class MazeLayout():
         """
         min_dist = float("inf")
         for maze_line in self.__lines:
-             min_dist = min(min_dist, D.dist_line_to_line(maze_line, line))
+             min_dist = min(min_dist, dist_line_to_line(maze_line, line))
         return min_dist
 
     def __collides(self, ball: Ball, line: Line):
@@ -98,7 +99,7 @@ class MazeLayout():
         Note that just hitting without overlapping counts as hitting.
         Also note that lines have a finite length here.
         """
-        distance = D.dist_point_line_segment(ball.pos, line)
+        distance = dist_point_line_segment(ball.pos, line)
         
         if (distance <= ball.rad):
             return True
@@ -178,7 +179,7 @@ class Model():
         return output
 
     def __does_ball_hit_boundary(self) -> bool:
-        return (D.is_ball_in_rect(self.__ball, self.__size) == False)
+        return (is_ball_in_rect(self.__ball, self.__size) == False)
 
     def get_ball_position(self) -> np.ndarray:
         return self.__ball.pos.copy()
