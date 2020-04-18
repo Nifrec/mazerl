@@ -4,8 +4,7 @@ Lulof Pirée (Nifrec)
 """
 import torch
 import numpy as np
-from .agent_class import Agent
-from .twin_network import TwinNetwork
+from agent.agent_class import Agent
 
 class TD3Agent(Agent):
     """
@@ -20,10 +19,10 @@ class TD3Agent(Agent):
     See Fujimoto et al. 2018 for the TD3 paper
     ('Addressing Function Approximation Error in Actor-Critic Methods')
     """
-    CRITIC_CLASS = TwinNetwork
 
-    def __init__(self, hyperparameters, device, state_size, checkpoint_dir):
-        super().__init__(hyperparameters, device, state_size, checkpoint_dir)
+    def __init__(self, hyperparameters, checkpoint_dir: str, 
+            actor_net: ActorNetwork, critic_net: Network):
+        super().__init__(hyperparameters, checkpoint_dir, actor_net, critic_net)
 
     def compute_target_action(self, next_states):
         target_actions = self.actor_target.forward(next_states)
