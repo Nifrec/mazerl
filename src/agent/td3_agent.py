@@ -5,6 +5,8 @@ Lulof Pirée (Nifrec)
 import torch
 import numpy as np
 from agent.agent_class import Agent
+from agent.actor_network import ActorNetwork
+from agent.critic_network import CriticNetwork
 
 class TD3Agent(Agent):
     """
@@ -20,9 +22,9 @@ class TD3Agent(Agent):
     ('Addressing Function Approximation Error in Actor-Critic Methods')
     """
 
-    def __init__(self, hyperparameters, checkpoint_dir: str, 
-            actor_net: ActorNetwork, critic_net: Network):
-        super().__init__(hyperparameters, checkpoint_dir, actor_net, critic_net)
+    def __init__(self, hyperparameters, 
+            actor_net: ActorNetwork, critic_net: CriticNetwork):
+        super().__init__(hyperparameters, actor_net, critic_net)
 
     def compute_target_action(self, next_states):
         target_actions = self.actor_target.forward(next_states)

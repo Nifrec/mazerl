@@ -23,10 +23,10 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from .auxiliary import Experience, HyperparameterTuple
-from .network import Network
-from .actor_network import ActorNetwork
-from .logger import Logger
+from agent.auxiliary import Experience, HyperparameterTuple
+from agent.critic_network import CriticNetwork
+from agent.actor_network import ActorNetwork
+from agent.logger import Logger
 
 
 class Agent():
@@ -36,9 +36,9 @@ class Agent():
     * Train the neural networks.
     * Select and clip actions.
     """
-    CRITIC_CLASS = Network
 
-    def __init__(self, hyperparameters, device, state_size, checkpoint_dir):
+    def __init__(self, hyperparameters, 
+            actor_net: ActorNetwork, critic_net: CriticNetwork):
         """
         Initialize the agent.
         Parameters:
@@ -50,43 +50,33 @@ class Agent():
         """
         
         self.hyperparameters = hyperparameters
-        self.device = device
-        self.state_size = state_size
+        self.actor = actor_net
+        self.critic = critic_net
+        self.__device = hyperparameters.device
+        self.__create_target_networks()
+        self.__set_checkpoint_dir(hyperparameters.save_dir)
+        
 
-        self.create_networks()
-        self.__set_checkpoint_dir(checkpoint_dir)
-
-    def create_networks(self):        
-        self.setup_critic_network()
-        self.setup_actor_network()
-        # Clone random initialization to target networks.
-        self.critic_target.load_state_dict(self.critic.state_dict())
+    def __create_target_networks(self):        
+        self.actor_target = type(self.actor)(self.actor.input_size,
+                self.actor.output_size)
+        self.critic_target = type(self.critic)(self.critic.input_size,
+                self.critic.output_size, self.critic.mode)
+        
+        # Clone also random initialization to target networks.
         self.actor_target.load_state_dict(self.actor.state_dict())
+        self.critic_target.load_state_dict(self.critic.state_dict())
+        self.actor_target.to(self.__device)
+        self.critic_target.to(self.__device)
+        # Targets never get trained, weights are always directly copied instead.
+        self.actor_target.eval()
+        self.critic_target.eval() 
 
         self.critic_optim = optim.Adam(params=self.critic.parameters(),
                 lr=self.hyperparameters.learning_rate_critic)
         self.actor_optim = optim.Adam(params=self.actor.parameters(), 
                 lr=self.hyperparameters.learning_rate_actor)
-
-    def setup_critic_network(self):
-        actor_output_size = self.hyperparameters.action_size
-        critic_output_size = 1 # The Q-value is just one number
-        # in DDPG/TD3 Q-function is also function of the action -> Q(s, a)
-        critic_input_size = self.state_size + actor_output_size
-        self.critic = self.CRITIC_CLASS(critic_input_size, critic_output_size)\
-                .to(self.device)
-        self.critic_target = self.CRITIC_CLASS(critic_input_size, 
-                critic_output_size).to(self.device)
-        self.critic_target.eval() # Never gets trained, weights directly copied
-
-    def setup_actor_network(self):
-        actor_output_size = self.hyperparameters.action_size
-        self.actor = ActorNetwork(self.state_size, actor_output_size)\
-                .to(self.device)
-        self.actor_target = ActorNetwork(self.state_size, actor_output_size)\
-                .to(self.device)
-        self.actor_target.eval() # Never gets trained, weights directly copied
-
+        
     def choose_action(self, state, select_random=False):
         """
         Query the actor-network and return the action chosen.
@@ -102,13 +92,12 @@ class Agent():
 
         Returns:
         * action: torch.tensor of shape self.hyperparameters.action_size,
-                stored on self.device.
+                stored on self.__device.
         * estimation: float, estimated Q-value for this state-action pair.
         """
-        assert (state.shape[-1] == self.state_size)
         if (select_random):
             action = (torch.rand(self.hyperparameters.action_size)-0.5)*2
-            action = action.unsqueeze(0).to(self.device)
+            action = action.unsqueeze(0).to(self.__device)
         else:
             noise_std = self.hyperparameters.exploration_noise_std
             action = self.actor(state) + np.random.normal(0, noise_std)

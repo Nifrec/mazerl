@@ -8,27 +8,35 @@ import os
 import torch
 import gym
 import enum
+from typing import Any, Tuple
 # Local imports
 from agent.auxiliary import HyperparameterTuple, get_timestamp, setup_save_dir,\
-        make_setup_info_file
+        make_setup_info_file, Mode
 from maze.environment_interface import Environment as MazeEnv
 from agent.trainer import Trainer
 from agent.logger import Logger
 from agent.agent_class import Agent
+from agent.td3_agent import TD3Agent
+from agent.actor_network import ActorNetwork
+from agent.critic_network import CriticNetwork
+from agent.actor_network_convolutional import ActorCNN
+from agent.critic_network_convolutional import CriticCNN
 import settings
 
 class Environments(enum.Enum):
     maze = 1
     lunarlander = 2
 
-def start_training(env: Environments):
+def start_training(env_name: Environments):
     checkpoint_dir = __create_checkpoint_dir_if_needed()
+    env = __create_environment(env_name)
     hyperparameters = __create_hyperparameters(checkpoint_dir, env)    
     __create_run_directory(hyperparameters)
-    agent = Agent
-    env = __create_environment(env)
+    actor, critic = __create_networks(env_name)
+    agent = __create_agent(hyperparameters, checkpoint_dir, actor, critic)
+    
     logger = Logger(hyperparameters)
-    trainer = Trainer(hyperparameters, logger, agent)
+    trainer = Trainer(hyperparameters, agent, logger)
     
     trainer.train()
     
@@ -57,7 +65,7 @@ def __create_run_directory(hyperparameters: HyperparameterTuple):
     setup_save_dir(hyperparameters.save_dir)
     make_setup_info_file(hyperparameters)\
 
-def __create_environment(env_name: Environments) -> "Gym-like environment":
+def __create_environment(env_name: Environments) -> Any:
     if (env_name == Environments.lunarlander):
         return gym.make("LunarLanderContinuous-v2")
     elif (env_name == Environments.maze):
@@ -65,23 +73,67 @@ def __create_environment(env_name: Environments) -> "Gym-like environment":
     else:
         raise ValueError(f"Invalid environment name given:'{env_name}''")
 
-def __create_agent(self) -> Agent:
-    assert False, "WIP"
-    if (self.mode == "TD3"):
-        self.agent = TD3Agent(self.hyperparameters, self.device,
-                self.state_size, self.hyperparameters.save_dir)
-    elif (self.mode == "DDPG"):
-        self.agent = Agent(self.hyperparameters, self.device, 
-                self.state_size, self.hyperparameters.save_dir)
-    else:
-        raise ValueError(self.__class__.__name__ + "invalid mode")
+def __create_agent(hyperparameters: HyperparameterTuple, 
+        checkpoint_dir: str, 
+        actor: ActorNetwork,
+        critic:CriticNetwork) -> Agent:
 
-def __create_hyperparameters(checkpint_dir: str, env:"Gym-like environment") \
+    agent: Agent
+
+    if (settings.MODE == Mode.TD3):
+        agent = TD3Agent(hyperparameters, actor, critic)
+    elif (settings.MODE == Mode.DDPG):
+        agent = Agent(hyperparameters, actor, critic)
+    else:
+        raise ValueError(f"invalid mode '{settings.MODE}")
+
+    return agent
+
+def __create_networks(env_name: Environments) \
+        -> Tuple[ActorNetwork, CriticNetwork]:
+    if (env_name == Environments.lunarlander):
+        actor_net = ActorNetwork(settings.LUNAR_ACTOR_IN,
+                settings.LUNAR_ACTOR_OUT)
+        critic_net = CriticNetwork(settings.LUNAR_CRITIC_IN,
+                settings.LUNAR_CRITIC_OUT, settings.MODE)
+    elif (env_name == Environments.maze):
+        # Input and output sizes ignored by the CNNs
+        actor_net = ActorCNN(0, 0)
+        critic_net = CriticCNN(0, 0, mode=settings.MODE)
+    else:
+        raise ValueError(f"invalid environment '{env_name}")
+
+    actor_net.to(settings.DEVICE)
+    critic_net.to(settings.DEVICE)
+
+    return actor_net, critic_net
+
+def setup_critic_network(self):
+    assert False,  "WIP"
+    actor_output_size = self.hyperparameters.action_size
+    critic_output_size = 1 # The Q-value is just one number
+    # in DDPG/TD3 Q-function is also function of the action -> Q(s, a)
+    critic_input_size = self.state_size + actor_output_size
+    self.critic = self.CRITIC_CLASS(critic_input_size, critic_output_size)\
+            .to(self.device)
+    self.critic_target = self.CRITIC_CLASS(critic_input_size, 
+            critic_output_size).to(self.device)
+        
+
+def setup_actor_network(self):
+    assert False, "WIP"
+    actor_output_size = self.hyperparameters.action_size
+    self.actor = ActorNetwork(self.state_size, actor_output_size)\
+            .to(self.device)
+    self.actor_target = ActorNetwork(self.state_size, actor_output_size)\
+            .to(self.device)
+
+def __create_hyperparameters(checkpint_dir: str, env:Any) \
         -> HyperparameterTuple:
     output = HyperparameterTuple(
             env = env,
             mode = settings.MODE, 
-            device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+            device=settings.DEVICE,
             discount_rate=0.99,
             learning_rate_critic=0.0003,
             learning_rate_actor=0.0003,
@@ -89,9 +141,9 @@ def __create_hyperparameters(checkpint_dir: str, env:"Gym-like environment") \
             min_action=-1.0,
             max_action=1.0,
             num_episodes=100000,
-            batch_size=32,
+            batch_size=8,
             max_episode_duration=2000,
-            memory_capacity=50000,
+            memory_capacity=500,
             polyak=0.999,
             # How many episodes between plot updates
             plot_interval=50, 
@@ -101,7 +153,7 @@ def __create_hyperparameters(checkpint_dir: str, env:"Gym-like environment") \
             action_size=2, # Length of action vector, depends on environment
             # relative directory name to save networks and plot in
             save_dir=os.path.join(checkpint_dir, get_timestamp() + "_" \
-                    + settings.MODE),
+                    + str(settings.MODE)),
             # Amount of initial episodes in which only random actions are taken.
             random_action_episodes=100,
             # The following hyperparameters are only used by TD3 (not by DDPG).

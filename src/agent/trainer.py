@@ -10,7 +10,8 @@ Possible future enhancements:
 import gym
 import math
 import random
-import numbers
+from numbers import Number
+from typing import Iterable, Tuple
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -32,6 +33,7 @@ from .auxiliary import compute_moving_average, \
 from .logger import Logger
 from .agent_class import Agent
 from .td3_agent import TD3Agent
+
 
 class Trainer:
     """
@@ -107,7 +109,7 @@ class Trainer:
 
         self.__logger.close_files()
 
-    def __choose_action(self, state: torch.Tensor, episode: int) 
+    def __choose_action(self, state: torch.Tensor, episode: int) \
             -> Iterable[Number]:
         """
         Lets agent choose either a random action at the beginning
@@ -118,33 +120,33 @@ class Trainer:
         action, value_estimation = self.__agent.choose_action(state,
                 select_random)
 
-        if (self.logger is not None):
-            self.logger.push_value_estimations(value_estimation)
-            if (self.logger.has_trained_critic()):
-                self.logger.push_trained_critic_experience(
+        if (self.__logger is not None):
+            self.__logger.push_value_estimations(value_estimation)
+            if (self.__logger.has_trained_critic()):
+                self.__logger.push_trained_critic_experience(
                         state.to(self.__device), action)
         return action
 
     def __update_agent(self, episode: int, batch: Tuple[Experience]):
         critic_loss, actor_loss = self.__agent.update(batch, episode)
-        if self.logger is not None:
-            self.logger.push_critic_loss(critic_loss)
+        if self.__logger is not None:
+            self.__logger.push_critic_loss(critic_loss)
             if actor_loss is not None:
-                self.logger.push_actor_loss(actor_loss)
+                self.__logger.push_actor_loss(actor_loss)
 
     def __process_training_data(self, episode, rewards_per_episode,
             episode_rewards):
         rewards_per_episode.append(sum(episode_rewards))
             
-        if (self.logger is not None):
-            self.logger.push_rewards(episode_rewards)
+        if (self.__logger is not None):
+            self.__logger.push_rewards(episode_rewards)
 
         if (episode % self.__hyperparameters.plot_interval == 0):
             self.__plot_and_print(episode, rewards_per_episode)
 
         if (episode % self.__hyperparameters.checkpoint_interval == 0):
             self.__save_progress(episode, rewards_per_episode)
-            self.logger.update()
+            self.__logger.update()
 
     def __plot_and_print(self, episode, rewards_per_episode):
         plot_reward_and_moving_average(
@@ -165,7 +167,7 @@ class Trainer:
                 self.__hyperparameters.save_dir
         )
 
-    def load_checkpoint(self, checkpoint_dir = None):
+    def load_checkpoint(self, checkpoint_dir=None):
         if (checkpoint_dir == None):
             checkpoint_dir = self.__hyperparameters.save_dir
         
@@ -183,7 +185,7 @@ class Trainer:
         """
         state = self.__env.reset()
         state = torch.tensor([state], dtype=torch.float).to(self.__device)
-        
+
         for timestep in range(max_episode_duration):
             self.__env.render()
             action, _ = self.__agent.choose_action(state,

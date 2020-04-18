@@ -23,6 +23,10 @@ class Network(nn.Module):
         # String used for checkpoint files.
         self.savefile_name = None
 
+        # Public fields
+        self.input_size = input_size
+        self.output_size= output_size
+
     def create_layers(self, input_size, output_size):
         self.l1 = nn.Linear(in_features=input_size, 
                 out_features=HIDDEN_LAYER_1_SIZE)

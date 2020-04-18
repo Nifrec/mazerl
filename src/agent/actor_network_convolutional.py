@@ -5,12 +5,12 @@ Lulof Pirée
 """
 
 import torch
-import toch.nn as nn
+import torch.nn as nn
 from agent.actor_network import ActorNetwork
 from maze.environment_interface import WINDOW_HEIGHT, WINDOW_WIDTH
 
 INPUT_CHANNELS = 3
-CONV_LAYERS_OUT = 12 * (WINDOW_HEIGHT * WINDOW_WIDTH) / (3*2) # = 768000
+CONV_LAYERS_OUT = 12 * (WINDOW_HEIGHT * WINDOW_WIDTH) // (6*4) # = 768000
 L1_OUT = 1000
 L2_OUT = 300
 L3_OUT = 1
@@ -23,13 +23,13 @@ class ActorCNN(ActorNetwork):
             nn.Conv2d(in_channels=INPUT_CHANNELS,
                     out_channels=2*INPUT_CHANNELS, kernel_size = 5, padding=2),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=3),
-            # 6 x (800 x 400) / 3
+            nn.MaxPool2d(kernel_size=6, stride=6),
+            # 6 x (800 x 480) / 3
             nn.Conv2d(in_channels=2*INPUT_CHANNELS,
                     out_channels=4*INPUT_CHANNELS, kernel_size = 3, padding=1),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2)
-            # 12 x (800 x 400) / (3*2)
+            nn.MaxPool2d(kernel_size=4, stride=4)
+            # 12 x (800 x 480) / (3*2)
         )
 
         self.linear = nn.Sequential(

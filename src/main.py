@@ -36,7 +36,6 @@ if (args.command == "human"):
     from maze.human_interface import HumanInterface
     HumanInterface()
 elif (args.command == "train"):
-    print("Sorry, this feature is still WIP")
     if args.environment == "maze":
         main_training.start_training(main_training.Environments.maze)
     elif args.environment == "gym-lunarlander":
