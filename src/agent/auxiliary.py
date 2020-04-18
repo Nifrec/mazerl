@@ -9,6 +9,7 @@ import time
 import os
 import random
 import collections
+import enum
 
 # This is a class not an instance!
 # See main.py for example use and more explanation.
@@ -31,6 +32,10 @@ HyperparameterTuple = collections.namedtuple("HyperparameterTuple",
 # This is a class not an instance!
 Experience = collections.namedtuple("Experience", 
         ["state", "action", "reward", "next_state", "done"])
+
+class Mode(enum.Enum):
+    DDPG = 1
+    TD3 = 2
 
 def compute_moving_average(values, period):
     """
