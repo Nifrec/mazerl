@@ -75,7 +75,6 @@ class TD3Agent(Agent):
         # to target critic. These are the 'good' examples.
         with torch.no_grad():
             target_actions = self.compute_target_action(next_states)
-            print(f"target-actions: {target_actions}")
             target_val1, target_val2 = self.critic_target.forward(
                     next_states, target_actions)
             target_values = torch.min(target_val1, target_val2)

@@ -83,8 +83,6 @@ class CriticCNN(CriticNetwork):
         * action: float 
         """
         batch_size = action.shape[-2]
-        print(f"action shape: {action.shape}")
-        print(f"batch_size: {batch_size}")
         a = torch.reshape(action, (batch_size, MAZE_ACTOR_OUT,))
         # Let each of the twins 'q1' and 'q2' make
         # a prediction, and then returen the minimum of the two.
