@@ -77,14 +77,13 @@ class Trainer:
             
             for timestep in range(self.__hyperparameters.max_episode_duration):
                 action = self.__choose_action(state, episode)
-                print(action)
                 next_state, reward, done, _ = self.__env.step(
                         action[0].tolist())
                 episode_rewards += [reward]
                 # Store experience as 4 tensors, since used in neural networks.
                 next_state = torch.tensor([next_state],
                         dtype=torch.float).to(self.__device)
-                reward = torch.tensor([reward], dtype=torch.float)\
+                reward = torch.tensor([reward], dtype=torch.int)\
                         .to(self.__device)
                 done = torch.tensor([done], dtype=torch.bool)\
                         .to(self.__device)
