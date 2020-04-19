@@ -141,15 +141,15 @@ def __create_hyperparameters(checkpint_dir: str, env:Any) \
             min_action=-1.0,
             max_action=1.0,
             num_episodes=100000,
-            batch_size=8,
+            batch_size=settings.BATCH_SIZE,
             max_episode_duration=2000,
-            memory_capacity=500,
+            memory_capacity=settings.REPLAY_MEMORY_CAP,
             polyak=0.999,
             # How many episodes between plot updates
             plot_interval=50, 
             moving_average_period=100,
             # How many episodes between saving data to disk
-            checkpoint_interval=100, 
+            checkpoint_interval=settings.CHECKPOINT_INTERVAL, 
             action_size=2, # Length of action vector, depends on environment
             # relative directory name to save networks and plot in
             save_dir=os.path.join(checkpint_dir, get_timestamp() + "_" \
