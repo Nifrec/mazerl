@@ -67,7 +67,7 @@ class Environment():
         won = self.__model.is_ball_at_finish()
         reward = self.__compute_reward(died, won)
         done = died or won
-        return self.__create_observation_array(), reward, done
+        return self.create_observation_array(), reward, done
 
     def __compute_reward(self, died: bool, won: bool) -> Number:
         if died:
@@ -77,7 +77,7 @@ class Environment():
         else:
             return REWARD_STEP
 
-    def __create_observation_array(self) -> np.ndarray:
+    def create_observation_array(self) -> np.ndarray:
         self.__update_display()
         red = pygame.surfarray.pixels_red(self.__screen)
         green = pygame.surfarray.pixels_green(self.__screen)
@@ -95,7 +95,7 @@ class Environment():
                     (shape: channel(=3) x width x heigth)
         """
         self.__model.reset(self.__generator.generate_maze())
-        return self.__create_observation_array()
+        return self.create_observation_array()
 
     def render(self):
         pygame.display.flip()
