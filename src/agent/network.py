@@ -37,7 +37,7 @@ class Network(nn.Module):
         self.out = nn.Linear(in_features=HIDDEN_LAYER_3_SIZE,
                 out_features=output_size)
         
-    def forward(self, t):
+    def forward(self, t: torch.Tensor) -> torch.Tensor:
         t = torch.relu(self.l1(t))
         t = torch.relu(self.l2(t))
         t = torch.relu(self.l3(t))

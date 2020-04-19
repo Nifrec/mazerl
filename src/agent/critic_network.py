@@ -50,12 +50,13 @@ class CriticNetwork(Network):
         self.q2_out = nn.Linear(in_features=HIDDEN_LAYER_3_SIZE,
                 out_features=output_size)
 
-    def forward(self, t: torch.Tensor):
+    def forward(self, state:torch.Tensor, action: torch.Tensor) -> torch.Tensor:
         """
         Returns output of foward propagation.
         In DDPG mode returns only one value,
         in TD3 mode returns values of both critics.
         """
+        t = torch.cat((state, action), dim=-1)
         # Let each of the twins 'q1' and 'q2' make
         # a prediction, and then returen the minimum of the two.
         t_q1 = t.clone()

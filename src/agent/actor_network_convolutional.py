@@ -8,12 +8,14 @@ import torch
 import torch.nn as nn
 from agent.actor_network import ActorNetwork
 from maze.environment_interface import WINDOW_HEIGHT, WINDOW_WIDTH
+from agent.settings import MAZE_ACTOR_OUT
 
-INPUT_CHANNELS = 3
-CONV_LAYERS_OUT = 12 * (WINDOW_HEIGHT * WINDOW_WIDTH) // (6*4) # = 768000
+INPUT_CHANNELS = 1
+#CONV_LAYERS_OUT = 4 * (WINDOW_HEIGHT * WINDOW_WIDTH) // (6*4)
+CONV_LAYERS_OUT = 2640
 L1_OUT = 1000
 L2_OUT = 300
-L3_OUT = 1
+L3_OUT = 2
 
 class ActorCNN(ActorNetwork):
     
@@ -40,9 +42,10 @@ class ActorCNN(ActorNetwork):
                 nn.Linear(L2_OUT, L3_OUT)
         )
 
-    def forward(self, t):
+    def forward(self, t: torch.Tensor) -> torch.Tensor:
+        batch_size = t.shape[0]
         t = self.cnn_layers(t)
-        t = self.linear(t.view(-1, CONV_LAYERS_OUT))
+        t = self.linear(t.reshape(batch_size, CONV_LAYERS_OUT))
         # Need to clone() otherwise pytorch complaints about
         # having in-place operations in autograd's tensors.
-        return torch.tanh(super().forward(t)).clone();
+        return torch.tanh(t.reshape(batch_size, MAZE_ACTOR_OUT)).clone();

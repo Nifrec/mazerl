@@ -70,13 +70,14 @@ class TD3Agent(Agent):
         # These can be different than at time of gathering the experience.
         # This does not matter and is a feature not a bug!
         values_q1, values_q2 = \
-                self.critic.forward(torch.cat((states, actions), dim=-1))
+                self.critic.forward(states, actions)
         # Compute Q-Value of next state + action (from target actor) according
         # to target critic. These are the 'good' examples.
         with torch.no_grad():
             target_actions = self.compute_target_action(next_states)
+            print(f"target-actions: {target_actions}")
             target_val1, target_val2 = self.critic_target.forward(
-                    torch.cat((next_states, target_actions), dim=-1))
+                    next_states, target_actions)
             target_values = torch.min(target_val1, target_val2)
             targets = rewards.unsqueeze(dim=-1) \
                     + (dones == False) \
@@ -100,7 +101,7 @@ class TD3Agent(Agent):
         states, _, _, _, _ = self.extract_experiences(batch)
         self.critic.eval()
         actions = self.actor.forward(states)
-        q1, q2 = self.critic.forward(torch.cat((states, actions), dim=-1))
+        q1, q2 = self.critic.forward(states, actions)
         values = torch.min(q1, q2)
         self.actor.train()
         self.actor_optim.zero_grad()
@@ -123,5 +124,5 @@ class TD3Agent(Agent):
         Returns:
         * float: estimated Q-value.
         """
-        q1, q2 = self.critic.forward(torch.cat((state, action), dim=-1))
+        q1, q2 = self.critic.forward(state, action)
         return torch.min(q1, q2).item()

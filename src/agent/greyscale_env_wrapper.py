@@ -5,14 +5,21 @@ Wrapper for the maze-environment that automatically converts observations
 Author: Lulof Pirée
 """
 import numpy as np
-from maze.environment_interface import Environment
+from typing import Iterable, Tuple
+from numbers import Number
+from maze.environment_interface import Environment, WINDOW_HEIGHT, WINDOW_WIDTH
 
 
 class GreyScaleEnvironment(Environment):
 
-    def __create_observation_array(self) -> np.ndarray:
-        print('running overridden method')
-        array = super()._Environment__create_observation_array()
-        print(array.mean(axis=1))
-        return array.mean(axis=1)
+    def create_observation_array(self) -> np.ndarray:
+        array = super().create_observation_array()
+        return array.mean(axis=0).reshape(1, WINDOW_WIDTH, WINDOW_HEIGHT)
+
+    def step(self, action: Iterable) -> Tuple[np.ndarray, Number, bool, None]:
+        """
+        Same as environment_interface.Environment.step(), but with added
+        None in output (to have same output size as gym's environments)
+        """
+        return super().step(action) + (None,)
 

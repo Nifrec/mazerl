@@ -12,7 +12,7 @@ from typing import Any, Tuple
 # Local imports
 from agent.auxiliary import HyperparameterTuple, get_timestamp, setup_save_dir,\
         make_setup_info_file, Mode
-from maze.environment_interface import Environment as MazeEnv
+from agent.greyscale_env_wrapper import GreyScaleEnvironment as MazeEnv
 from agent.trainer import Trainer
 from agent.logger import Logger
 from agent.agent_class import Agent
@@ -21,7 +21,7 @@ from agent.actor_network import ActorNetwork
 from agent.critic_network import CriticNetwork
 from agent.actor_network_convolutional import ActorCNN
 from agent.critic_network_convolutional import CriticCNN
-import settings
+import agent.settings as settings
 
 class Environments(enum.Enum):
     maze = 1
