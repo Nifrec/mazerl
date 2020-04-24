@@ -27,6 +27,7 @@ from agent.auxiliary import Experience, HyperparameterTuple
 from agent.critic_network import CriticNetwork
 from agent.actor_network import ActorNetwork
 from agent.logger import Logger
+from agent.auxiliary import Mode
 
 
 class Agent():
@@ -126,7 +127,7 @@ class Agent():
         Returns:
         * float: estimated Q-value.
         """
-        return self.critic.forward(torch.cat((state, action), dim=-1)).item()
+        return self.critic.forward(state, action).item()
 
     def update(self, batch, episode):
         """
@@ -156,12 +157,11 @@ class Agent():
         # = 'bad' thing to improve
         # These can be different than at time of gathering the experience.
         # This does not matter and is a feature not a bug!
-        values = self.critic.forward(torch.cat((states, actions), dim=-1))
+        values = self.critic.forward(states, actions)
         # Compute Q-Value of next state + action (from target actor) according
         # to target critic. These are the 'good' examples.
         target_actions = self.compute_target_action(next_states)
-        target_values = self.critic_target.forward(
-                torch.cat((next_states, target_actions), dim=-1))
+        target_values = self.critic_target.forward(next_states, target_actions)
         targets = rewards.unsqueeze(dim=-1) \
                 + (dones == False) \
                     * self.hyperparameters.discount_rate * target_values
@@ -186,7 +186,7 @@ class Agent():
         states, _, _, _, _ = self.extract_experiences(batch)
         self.critic.eval()
         actions = self.actor.forward(states)
-        values = self.critic.forward(torch.cat((states, actions), dim=-1))
+        values = self.critic.forward(states, actions)
         self.actor.train()
         self.actor_optim.zero_grad()
         loss = ((-1*values).mean())

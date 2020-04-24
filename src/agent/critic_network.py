@@ -29,7 +29,7 @@ class CriticNetwork(Network):
 
     def __init__(self, input_size: int, output_size: int, mode: Mode):
         super().__init__(input_size, output_size)
-        self.mode = Mode
+        self.mode = mode
 
     def create_layers(self, input_size:int, output_size:int):
         self.q1_l1 = nn.Linear(in_features=input_size,
