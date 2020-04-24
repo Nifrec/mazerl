@@ -15,10 +15,11 @@ import numpy as np
 import time
 
 # Local imports
-from .model import Model
-from .record_types import Size
-from .pygame_visualizer import PygameVisualizer
-from .maze_generator import MazeGenerator
+from maze.model import Model
+from maze.record_types import Size
+from maze.pygame_ghost_visualizer import GhostVisualizer
+from maze.maze_generator import MazeGenerator
+
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 480
@@ -38,7 +39,7 @@ class Environment():
         self.__size = size
         self.__model = Model(size, BALL_RAD)
         self.__generator = MazeGenerator(size, BALL_RAD, MAZE_OFFSET)
-
+        self.__visualizer = GhostVisualizer()
         self.__init_display()
 
     def step(self, action: Iterable) -> Tuple[np.ndarray, Number, bool]:
@@ -115,5 +116,5 @@ class Environment():
         what is actually displayed on the screen on its own.
         (Use self.render() or pygame.display.flip() for that last step)
         """
-        surf = self.__model.render(PygameVisualizer)
+        surf = self.__model.render(self.__visualizer)
         self.__screen.blit(surf, (0, 0))
