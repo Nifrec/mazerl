@@ -74,10 +74,7 @@ def __create_environment(env_name: Environments) -> Any:
         raise ValueError(f"Invalid environment name given:'{env_name}''")
 
 def __create_agent(hyperparameters: HyperparameterTuple, 
-        checkpoint_dir: str, 
-        actor: ActorNetwork,
-        critic:CriticNetwork) -> Agent:
-
+        checkpoint_dir: str, actor: ActorNetwork,critic:CriticNetwork) -> Agent:
     agent: Agent
 
     if (settings.MODE == Mode.TD3):
@@ -95,7 +92,7 @@ def __create_networks(env_name: Environments) \
         actor_net = ActorNetwork(settings.LUNAR_ACTOR_IN,
                 settings.LUNAR_ACTOR_OUT)
         critic_net = CriticNetwork(settings.LUNAR_CRITIC_IN,
-                settings.LUNAR_CRITIC_OUT, settings.MODE)
+                settings.LUNAR_CRITIC_OUT, mode=settings.MODE)
     elif (env_name == Environments.maze):
         # Input and output sizes ignored by the CNNs
         actor_net = ActorCNN(0, 0)

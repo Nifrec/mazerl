@@ -19,10 +19,11 @@ import pygame
 import numpy as np
 import time
 
-from .model import Model, MazeLayout
-from .record_types import Size, Line
-from .pygame_visualizer import PygameVisualizer
-from .maze_generator import MazeGenerator
+from maze.model import Model, MazeLayout
+from maze.record_types import Size, Line
+from maze.pygame_visualizer import PygameVisualizer
+from maze.pygame_ghost_visualizer import GhostVisualizer
+from maze.maze_generator import MazeGenerator
 
 
 FPS = 30
@@ -42,6 +43,7 @@ class HumanInterface():
     def __init__(self, fps: Number = FPS, 
             width: Number = WINDOW_WIDTH, height: Number = WINDOW_HEIGHT,
             fullscreen: bool=False):
+        self.__visualizer = GhostVisualizer()
         
         pygame.init()
         pygame.display.set_caption("MazeRL Human Interface")
@@ -140,7 +142,7 @@ class HumanInterface():
         time.sleep(GAME_OVER_TIME)
     
     def render_model(self):
-        surf = self.__model.render(PygameVisualizer)
+        surf = self.__model.render(self.__visualizer)
         self.__screen.blit(surf, (0, 0))
 
     def create_random_maze(self):
