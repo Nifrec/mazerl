@@ -11,6 +11,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+from typing import Any
 
 from agent.critic_network import CriticNetwork
 from agent.auxiliary import Mode
@@ -72,7 +73,7 @@ class CriticCNN(CriticNetwork):
             nn.Linear(L2_OUT, L3_OUT)
         )
 
-    def forward(self, state:torch.Tensor, action: torch.Tensor) -> torch.Tensor:
+    def forward(self, state:torch.Tensor, action: torch.Tensor) -> Any:
         """
         Returns output of foward propagation.
         In DDPG mode returns only one value,
