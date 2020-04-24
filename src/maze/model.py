@@ -10,10 +10,10 @@ from typing import Any
 import numpy as np
 import enum
 # Local imports
-from .distances import euclidean_dist, dist_line_to_line, \
+from maze.distances import euclidean_dist, dist_line_to_line, \
         dist_point_line_segment,is_ball_in_rect
-from .record_types import Size, Line, Ball
-from .abstract_visualizer import Visualizer
+from maze.record_types import Size, Line, Ball
+from maze.abstract_visualizer import Visualizer
 
 class MazeLayout():
     """
@@ -82,7 +82,7 @@ class MazeLayout():
                 return True
         return False
 
-    def compute_min_dist_line_to_wall(self, line: Line) -> Number:
+    def compute_min_dist_line_to_wall(self, line: Line) -> float:
         """
         Returns the minimum distance of a given line to any of the walls
         in this MazeLayout.
