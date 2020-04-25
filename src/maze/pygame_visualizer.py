@@ -16,6 +16,7 @@ import numpy as np
 # Local imports
 from maze.record_types import Ball, Line, Size
 from maze.abstract_visualizer import Visualizer
+from .model import Model
 
 class PygameVisualizer(Visualizer):
     """
@@ -29,9 +30,37 @@ class PygameVisualizer(Visualizer):
     END_HALO_RAD = 15
     LINE_WIDTH = 1
 
+    def __init__(self, model: Model):
+        self.__model = model
+        self.__is_first_render_call = True
+
+    def render(self, display: pygame.Surface):
+        """
+        Updates the display with changes since the last render() call.
+        The first time render() is called it will draw the entire maze.
+        
+        Note that this assumes no other function or method blits anything
+        on the display inbetween render() calls.
+        """
+        if (self.__is_first_render_call):
+            self.__is_first_render_call = False
+            self.__render_maze_layout()
+
+        self.render_ball(self.__model.get_ball_rad(),
+                self.__model.get_ball_position(), display)
+    
+    def __render_maze_layout(self):
+        self.__layout_surf = pygame.Surface(display.get_size())
+        self.__layout_surf.fill(self.BACKGROUND_COLOR)
+        self.render_end(self.__model.get_layout().get_end(),
+                self.__layout_surf)
+        self.render_lines(self.__model.get_layout().get_lines(),
+                self.__layout_surf)
+        display.blit(self.__layout_surf, (0, 0))
+
     @staticmethod
-    def render_ball(ball: Ball, target: pygame.Surface) \
-            -> pygame.Surface:
+    def render_ball(ball_rad: int, ball_pos: np.ndarray,
+            target: pygame.Surface) -> pygame.Surface:
         """
         Draws a Ball to a pygame.Surface instance,
         with PygameVisualizer.BALL_COLOR as color.
@@ -48,7 +77,6 @@ class PygameVisualizer(Visualizer):
         with PygameVisualizer.WALL_COLOR as color,
         and width PygameVisualizer.LINE_WIDTH.
         """
-        
         for line in lines:
             pygame.draw.line(target, PygameVisualizer.WALL_COLOR, line.p0,
                     line.p1, PygameVisualizer.LINE_WIDTH)
@@ -70,12 +98,11 @@ class PygameVisualizer(Visualizer):
         
         return target
 
-    @staticmethod
-    def create_rendered_object(size: Size) -> pygame.Surface:
-        """
-        Creates an empty Surface of the given size,
-        filled with PygameVisualizer.BACKGROUND_COLOR.
-        """
-        output = pygame.Surface((size.x, size.y))
-        output.fill(PygameVisualizer.BACKGROUND_COLOR)
-        return output
+    # def create_rendered_object(size: Size) -> pygame.Surface:
+    #     """
+    #     Creates an empty Surface of the given size,
+    #     filled with PygameVisualizer.BACKGROUND_COLOR.
+    #     """
+    #     output = pygame.Surface((size.x, size.y))
+    #     output.fill(PygameVisualizer.BACKGROUND_COLOR)
+    #     return output

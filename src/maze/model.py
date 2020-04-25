@@ -106,15 +106,15 @@ class MazeLayout():
         else:
             return False
 
-    def render(self, visualizer: Visualizer, target: Any) -> Any:
-        """
-        Renders the walls of this MazeLayout to the target object.
+    # def render(self, visualizer: Visualizer, target: Any) -> Any:
+    #     """
+    #     Renders the walls of this MazeLayout to the target object.
 
-        NOTE: Ensure that the supplied Visualizer implementation
-        can render to the supplied target.
-        """
-        visualizer.render_end(self.__end, target)
-        return visualizer.render_lines(self.__lines, target)
+    #     NOTE: Ensure that the supplied Visualizer implementation
+    #     can render to the supplied target.
+    #     """
+    #     visualizer.render_end(self.__end, target)
+    #     return visualizer.render_lines(self.__lines, target)
 
     def get_start(self):
         return self.__start.copy()
@@ -206,20 +206,23 @@ class Model():
         else:
             return True
 
-    def render(self, visualizer: Visualizer) -> Any:
-        """
-        Renders the maze using the supplied Visualizer implementation.
+    # def render(self, visualizer: Visualizer) -> Any:
+    #     """
+    #     Renders the maze using the supplied Visualizer implementation.
         
-        NOTE: Ensure that the supplied Visualizer implementation
-        can render to the supplied target.
-        """
-        target = visualizer.create_rendered_object(self.__size)
-        self.__layout.render(visualizer, target)
-        visualizer.render_ball(self.__ball, target)
-        return target
+    #     NOTE: Ensure that the supplied Visualizer implementation
+    #     can render to the supplied target.
+    #     """
+    #     target = visualizer.create_rendered_object(self.__size)
+    #     self.__layout.render(visualizer, target)
+    #     visualizer.render_ball(self.__ball, target)
+    #     return target
 
     def get_layout(self):
         return self.__layout
+
+    def get_ball_rad(self):
+        return self.__ball.rad
 
 def check_validity_point(point: np.ndarray):
     if not isinstance(point, np.ndarray):
