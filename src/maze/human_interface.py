@@ -43,7 +43,7 @@ class HumanInterface():
     def __init__(self, fps: Number = FPS, 
             width: Number = WINDOW_WIDTH, height: Number = WINDOW_HEIGHT,
             fullscreen: bool=False):
-        self.__visualizer = GhostVisualizer()
+        
         
         pygame.init()
         pygame.display.set_caption("MazeRL Human Interface")
@@ -61,6 +61,7 @@ class HumanInterface():
         #self._screen.fill(backgroundcolor)
         pygame.display.flip()
         self.__model = Model(self.__size, BALL_RAD)
+        self.__visualizer = GhostVisualizer(self.__model)
         self.create_random_maze()
         self.render_model()
         self.run()
@@ -142,8 +143,7 @@ class HumanInterface():
         time.sleep(GAME_OVER_TIME)
     
     def render_model(self):
-        surf = self.__model.render(self.__visualizer)
-        self.__screen.blit(surf, (0, 0))
+        self.__visualizer.render(self.__screen)
 
     def create_random_maze(self):
         self.__model.reset(self.__maze_gen.generate_maze())

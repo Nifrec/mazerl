@@ -6,18 +6,19 @@ Author: Lulof Pirée
 # Library imports
 import abc
 import pygame
+import numpy as np
 from typing import Any, Set, Iterable
 from numbers import Number
 # Local imports
 from .record_types import Ball, Line, Size
-from .model import Model
+#from .model import Model
 
 class Visualizer(abc.ABC):
     """
     Abstract visualizer that provides interface for all visualizers.
     """
     @abc.abstractmethod
-    def __init__(self, model: Model):
+    def __init__(self, model):
         pass
 
     @abc.abstractmethod

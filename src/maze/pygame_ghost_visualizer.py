@@ -10,14 +10,19 @@ import numpy as np
 
 from maze.record_types import Ball, Size
 from maze.pygame_visualizer import PygameVisualizer
+from .model import Model
 
 class GhostVisualizer(PygameVisualizer):
     
     GHOST_COLOR = pygame.Color(128, 0, 0, 10)
     GHOST_MOVEMENT_DELAY = 0.5
 
-    def __init__(self):
+    def __init__(self, model: Model):
+        super().__init__(model)
         self.__prev_ball = None
+
+    def render(self, screen: pygame.Surface):
+        super().render(screen)
 
     def render_ball(self, ball: Ball, target: pygame.Surface) \
             -> pygame.Surface:
