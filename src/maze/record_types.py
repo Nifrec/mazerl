@@ -30,7 +30,9 @@ class Line():
         self.p1 = np.array([x2, y2])
         #self.length = math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
         # Coefficients of equation ax + by + c = 0 for this line.
-        
+
+    def copy(self):
+        return Line(self.p0[0], self.p0[1], self.p1[0], self.p1[1])
 
     def __str__(self):
         return f"Line ({self.p0}, {self.p1})"
