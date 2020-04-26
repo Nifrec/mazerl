@@ -24,7 +24,15 @@ class Visualizer(abc.ABC):
     @abc.abstractmethod
     def render(self, screen: pygame.Surface):
         """
-        Blits the maze to the screen.
+        Blits the whole maze to the screen. 
+        """
+        pass
+
+    @abc.abstractmethod
+    def update(self, screen: pygame.Surface):
+        """
+        Only updates portion of screen changed since last timestep.
+        Assumes either update() or render() was called last timestep.
         """
         pass
 
