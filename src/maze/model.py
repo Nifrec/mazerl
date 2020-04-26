@@ -6,7 +6,7 @@ Author: Lulof Pirée
 # Library imports
 import math
 from numbers import Number
-from typing import Any
+from typing import Any, Set
 import numpy as np
 import enum
 # Local imports
@@ -106,24 +106,23 @@ class MazeLayout():
         else:
             return False
 
-    # def render(self, visualizer: Visualizer, target: Any) -> Any:
-    #     """
-    #     Renders the walls of this MazeLayout to the target object.
-
-    #     NOTE: Ensure that the supplied Visualizer implementation
-    #     can render to the supplied target.
-    #     """
-    #     visualizer.render_end(self.__end, target)
-    #     return visualizer.render_lines(self.__lines, target)
-
-    def get_start(self):
+    def get_start(self) -> np.ndarray:
         return self.__start.copy()
     
-    def get_end(self):
+    def get_end(self) -> np.ndarray:
         return self.__end.copy()
 
-    def get_size(self):
+    def get_size(self) -> Size:
         return self.__size.copy()
+
+    def get_lines(self) -> Set[Line]:
+        """
+        Returns a copy of all the lines stored in this MazeLayout.
+        """
+        output = set()
+        for line in self.__lines:
+            output.add(line.copy())
+        return output
 
 class Model():
 
@@ -205,18 +204,6 @@ class Model():
             return False
         else:
             return True
-
-    # def render(self, visualizer: Visualizer) -> Any:
-    #     """
-    #     Renders the maze using the supplied Visualizer implementation.
-        
-    #     NOTE: Ensure that the supplied Visualizer implementation
-    #     can render to the supplied target.
-    #     """
-    #     target = visualizer.create_rendered_object(self.__size)
-    #     self.__layout.render(visualizer, target)
-    #     visualizer.render_ball(self.__ball, target)
-    #     return target
 
     def get_layout(self):
         return self.__layout

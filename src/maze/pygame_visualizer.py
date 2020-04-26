@@ -36,11 +36,22 @@ class PygameVisualizer(Visualizer):
 
     def render(self, screen: pygame.Surface):
         """
-        Updates the display with changes since the last render() call.
-        The first time render() is called it will draw the entire maze.
+        Draws the whole maze, and creates a background cache for optimized
+        update() calls.
         
         Note that this assumes no other function or method blits anything
         on the display inbetween render() calls.
+        """
+        self.__is_first_render_call = True
+        self.update(screen)
+
+    def update(self, screen: pygame.Surface):
+        """
+        Updates the display with changes since the last render() / update()
+        call.
+        
+        Note that this assumes no other function or method blits anything
+        on the display in-between render() / update() calls.
         """
         self.__old_ball_pos: np.ndarray
         ball_pos = self.__model.get_ball_position() # Returns np.ndarray
@@ -48,19 +59,18 @@ class PygameVisualizer(Visualizer):
         if (self.__is_first_render_call):
             self.__setup_basic_layout(screen)
         else:
-            dirty_rect_size = (2*ball_rad, 2*ball_rad)
-            dirty_rect = pygame.Rect(self.__old_ball_pos, dirty_rect_size)
-            screen.blit(screen, self.__old_ball_pos, dirty_rect)
+            self.__clean_dirty_rect_old_pos_ball(screen, ball_rad)
 
         # Pos of right-upper corner of rectangle surrounding the ball.
         self.__old_ball_pos =  (ball_pos - ball_rad).round().astype(np.int)
         
         PygameVisualizer.render_ball(ball_rad, ball_pos, screen)
 
-    def update(self, screen: pygame.Surface):
-        pass
-
-
+    def __clean_dirty_rect_old_pos_ball(self, screen:pygame.Surface, 
+            ball_rad: int):
+        dirty_rect_size = (2*ball_rad, 2*ball_rad)
+        dirty_rect = pygame.Rect(self.__old_ball_pos, dirty_rect_size)
+        screen.blit(self.__layout_surf, self.__old_ball_pos, dirty_rect)
 
     def __setup_basic_layout(self, screen:pygame.Surface):
         """

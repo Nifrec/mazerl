@@ -61,9 +61,9 @@ class HumanInterface():
         #self._screen.fill(backgroundcolor)
         pygame.display.flip()
         self.__model = Model(self.__size, BALL_RAD)
-        self.__visualizer = GhostVisualizer(self.__model)
+        self.__visualizer = PygameVisualizer(self.__model)
         self.create_random_maze()
-        self.render_model()
+        self.render_all()
         self.run()
 
     def run(self):
@@ -73,7 +73,7 @@ class HumanInterface():
             self.__clock.tick(self.__fps)
             self.process_events()
             self.process_model()
-            self.render_model()
+            self.render_update_ball()
             pygame.display.flip()
         pygame.quit()
 
@@ -120,9 +120,11 @@ class HumanInterface():
         if (hit_wall):
             self.death_screen()
             self.create_random_maze()
+            self.render_all()
         elif (self.__model.is_ball_at_finish()):
             self.win_screen()
             self.create_random_maze()
+            self.render_all()
 
     def death_screen(self):
         """
@@ -142,8 +144,11 @@ class HumanInterface():
         pygame.display.flip()
         time.sleep(GAME_OVER_TIME)
     
-    def render_model(self):
+    def render_all(self):
         self.__visualizer.render(self.__screen)
+
+    def render_update_ball(self):
+        self.__visualizer.update(self.__screen)
 
     def create_random_maze(self):
         self.__model.reset(self.__maze_gen.generate_maze())
