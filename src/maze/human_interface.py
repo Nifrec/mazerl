@@ -77,7 +77,6 @@ class HumanInterface():
             pygame.display.flip()
         pygame.quit()
 
-     
     def process_events(self):
         """
         This method registers keypresses and maps them to
