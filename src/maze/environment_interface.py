@@ -15,10 +15,10 @@ import numpy as np
 import time
 
 # Local imports
-from maze.model import Model
-from maze.record_types import Size
-from maze.pygame_ghost_visualizer import GhostVisualizer
-from maze.maze_generator import MazeGenerator
+from .model import Model
+from .record_types import Size
+from .pygame_ghost_visualizer import GhostVisualizer
+from .maze_generator import MazeGenerator
 
 
 WINDOW_WIDTH = 800
@@ -39,7 +39,7 @@ class Environment():
         self.__size = size
         self.__model = Model(size, BALL_RAD)
         self.__generator = MazeGenerator(size, BALL_RAD, MAZE_OFFSET)
-        self.__visualizer = GhostVisualizer()
+        self.__visualizer = GhostVisualizer(self.__model)
         self.__init_display()
 
     def step(self, action: Iterable) -> Tuple[np.ndarray, Number, bool]:
@@ -96,6 +96,7 @@ class Environment():
                     (shape: channel(=3) x width x heigth)
         """
         self.__model.reset(self.__generator.generate_maze())
+        self.__render_all()
         return self.create_observation_array()
 
     def render(self):
@@ -116,5 +117,8 @@ class Environment():
         what is actually displayed on the screen on its own.
         (Use self.render() or pygame.display.flip() for that last step)
         """
-        surf = self.__model.render(self.__visualizer)
-        self.__screen.blit(surf, (0, 0))
+        self.__visualizer.update(self.__screen)
+
+    def __render_all(self):
+        self.__visualizer.render(self.__screen)
+        

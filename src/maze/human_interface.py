@@ -43,7 +43,7 @@ class HumanInterface():
     def __init__(self, fps: Number = FPS, 
             width: Number = WINDOW_WIDTH, height: Number = WINDOW_HEIGHT,
             fullscreen: bool=False):
-        self.__visualizer = GhostVisualizer()
+        
         
         pygame.init()
         pygame.display.set_caption("MazeRL Human Interface")
@@ -61,8 +61,9 @@ class HumanInterface():
         #self._screen.fill(backgroundcolor)
         pygame.display.flip()
         self.__model = Model(self.__size, BALL_RAD)
+        self.__visualizer = GhostVisualizer(self.__model)
         self.create_random_maze()
-        self.render_model()
+        self.render_all()
         self.run()
 
     def run(self):
@@ -72,11 +73,10 @@ class HumanInterface():
             self.__clock.tick(self.__fps)
             self.process_events()
             self.process_model()
-            self.render_model()
+            self.render_update_ball()
             pygame.display.flip()
         pygame.quit()
 
-     
     def process_events(self):
         """
         This method registers keypresses and maps them to
@@ -119,9 +119,11 @@ class HumanInterface():
         if (hit_wall):
             self.death_screen()
             self.create_random_maze()
+            self.render_all()
         elif (self.__model.is_ball_at_finish()):
             self.win_screen()
             self.create_random_maze()
+            self.render_all()
 
     def death_screen(self):
         """
@@ -141,9 +143,11 @@ class HumanInterface():
         pygame.display.flip()
         time.sleep(GAME_OVER_TIME)
     
-    def render_model(self):
-        surf = self.__model.render(self.__visualizer)
-        self.__screen.blit(surf, (0, 0))
+    def render_all(self):
+        self.__visualizer.render(self.__screen)
+
+    def render_update_ball(self):
+        self.__visualizer.update(self.__screen)
 
     def create_random_maze(self):
         self.__model.reset(self.__maze_gen.generate_maze())

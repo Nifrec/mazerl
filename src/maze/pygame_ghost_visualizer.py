@@ -10,38 +10,49 @@ import numpy as np
 
 from maze.record_types import Ball, Size
 from maze.pygame_visualizer import PygameVisualizer
+from .model import Model
 
 class GhostVisualizer(PygameVisualizer):
     
     GHOST_COLOR = pygame.Color(128, 0, 0, 10)
     GHOST_MOVEMENT_DELAY = 0.5
 
-    def __init__(self):
-        self.__prev_ball = None
+    def __init__(self, model: Model):
+        super().__init__(model)
+        self.__is_first_render = True
 
-    def render_ball(self, ball: Ball, target: pygame.Surface) \
-            -> pygame.Surface:
-        """
-        Draws a Ball to a pygame.Surface instance,
-        with PygameVisualizer.BALL_COLOR as color.
-        Also draws a transparent 'ghost ball' that lags behind 
-        the location of the ball.
+    def render(self, screen: pygame.Surface):
+        super().render(screen)
 
-        NOTE: not static like in PygameVisualizer because it has internal state.
-        (i.e. the previous location of the ball.)
+    def _draw_below_ball_effects_hook(self, screen: pygame.Surface):
         """
-        if (self.__prev_ball == None):
+        Adds cleaning up of ghost-ball dirty rect on top
+        of PygameVisualizer's update()
+        """
+        ball_pos = self._model.get_ball_position()
+        ball_rad = self._model.get_ball_rad()
+        if ( self.__is_first_render):
             # Velocity and acceleration are not needed, only the size 
             # and position.
-            self.__prev_ball = Ball(ball.pos[0], ball.pos[1], ball.rad)
+            self.__ghost_ball = Ball(ball_pos[0], ball_pos[1], ball_rad)
+            self.__is_first_render = False
 
-        pygame.draw.circle(target, GhostVisualizer.GHOST_COLOR,
-                self.__prev_ball.pos.round().astype(np.int),
-                self.__prev_ball.rad, 0)
-        self.__prev_ball.pos = GhostVisualizer.GHOST_MOVEMENT_DELAY \
-            * self.__prev_ball.pos \
-            + GhostVisualizer.GHOST_MOVEMENT_DELAY * ball.pos.copy()
+        self.__clean_dirty_rect_ghost_ball(screen)
 
-        target = super().render_ball(ball, target)
+        self.__ghost_ball.pos = GhostVisualizer.GHOST_MOVEMENT_DELAY \
+            * self.__ghost_ball.pos \
+            + GhostVisualizer.GHOST_MOVEMENT_DELAY * ball_pos
         
-        return target
+        pygame.draw.circle(screen, GhostVisualizer.GHOST_COLOR,
+                self.__ghost_ball.pos.round().astype(np.int),
+                self.__ghost_ball.rad, 0)
+
+    def __clean_dirty_rect_ghost_ball(self, screen: pygame.Surface):
+        # Make the rect 1 pixels larger in each direction (from center)
+        # to avoid position-rounding parts missing.
+        dirty_rect_size = (2*self.__ghost_ball.rad + 2, 2*self.__ghost_ball.rad + 2)
+        dirty_rect = pygame.Rect(self.__ghost_ball.pos.round().astype(np.int) - self.__ghost_ball.rad - 1,
+                dirty_rect_size)
+        screen.blit(self._layout_surf, 
+                self.__ghost_ball.pos - self.__ghost_ball.rad,
+                dirty_rect)

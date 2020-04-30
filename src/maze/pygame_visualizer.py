@@ -16,6 +16,7 @@ import numpy as np
 # Local imports
 from maze.record_types import Ball, Line, Size
 from maze.abstract_visualizer import Visualizer
+from .model import Model
 
 class PygameVisualizer(Visualizer):
     """
@@ -29,15 +30,89 @@ class PygameVisualizer(Visualizer):
     END_HALO_RAD = 15
     LINE_WIDTH = 1
 
+    def __init__(self, model: Model):
+        self._model = model
+        self.__is_first_render_call = True
+
+    def render(self, screen: pygame.Surface):
+        """
+        Draws the whole maze, and creates a background cache for optimized
+        update() calls.
+        
+        Note that this assumes no other function or method blits anything
+        on the display inbetween render() calls.
+        """
+        self.__is_first_render_call = True
+        self.update(screen)
+
+    def update(self, screen: pygame.Surface):
+        """
+        Updates the display with changes since the last render() / update()
+        call.
+        
+        Note that this assumes no other function or method blits anything
+        on the display in-between render() / update() calls.
+        """
+        self.__old_ball_pos: np.ndarray
+        ball_pos = self._model.get_ball_position() # Returns np.ndarray
+        ball_rad = self._model.get_ball_rad()
+        if (self.__is_first_render_call):
+            self.__setup_basic_layout(screen)
+        else:
+            self.__clean_dirty_rect_old_pos_ball(screen, ball_rad)
+
+        # Pos of right-upper corner of rectangle surrounding the ball.
+        self.__old_ball_pos =  (ball_pos - ball_rad).round().astype(np.int)
+
+        self._draw_below_ball_effects_hook(screen)
+        
+        self.render_ball(ball_rad, ball_pos, screen)
+
+    def _draw_below_ball_effects_hook(self, screen: pygame.Surface):
+        """
+        Can be used by subclasses to draw effects inbetween the cleaning
+        of dirty rects and the drawing of the ball.
+        """
+        pass
+
+    def __clean_dirty_rect_old_pos_ball(self, screen:pygame.Surface, 
+            ball_rad: int):
+        dirty_rect_size = (2*ball_rad, 2*ball_rad)
+        dirty_rect = pygame.Rect(self.__old_ball_pos, dirty_rect_size)
+        screen.blit(self._layout_surf, self.__old_ball_pos, dirty_rect)
+
+    def __setup_basic_layout(self, screen:pygame.Surface):
+        """
+        Renders the layout of the maze to the screen and stores a cache
+        of the maze, which can be used for cleaning dirty-rects created by the
+        moving ball.
+        """
+        self.__is_first_render_call = False
+        self._layout_surf = self.__render_maze_layout(screen)
+    
+    def __render_maze_layout(self, screen: pygame.Surface) -> pygame.Surface:
+        """
+        Renders maze to the screen, also returns the rendered maze
+        so that it can be cached.
+        """
+        output = pygame.Surface(screen.get_size())
+        output.fill(self.BACKGROUND_COLOR)
+        PygameVisualizer.render_end(self._model.get_layout().get_end(),
+                output)
+        PygameVisualizer.render_lines(self._model.get_layout().get_lines(),
+                output)
+        screen.blit(output, (0, 0))
+        return output
+        
     @staticmethod
-    def render_ball(ball: Ball, target: pygame.Surface) \
-            -> pygame.Surface:
+    def render_ball(ball_rad: int, ball_pos: np.ndarray,
+            target: pygame.Surface) -> pygame.Surface:
         """
         Draws a Ball to a pygame.Surface instance,
         with PygameVisualizer.BALL_COLOR as color.
         """
         pygame.draw.circle(target, PygameVisualizer.BALL_COLOR, 
-                ball.pos.round().astype(np.int), ball.rad, 0)
+                ball_pos.round().astype(np.int), ball_rad, 0)
         return target
 
     @staticmethod
@@ -48,7 +123,6 @@ class PygameVisualizer(Visualizer):
         with PygameVisualizer.WALL_COLOR as color,
         and width PygameVisualizer.LINE_WIDTH.
         """
-        
         for line in lines:
             pygame.draw.line(target, PygameVisualizer.WALL_COLOR, line.p0,
                     line.p1, PygameVisualizer.LINE_WIDTH)
@@ -70,12 +144,11 @@ class PygameVisualizer(Visualizer):
         
         return target
 
-    @staticmethod
-    def create_rendered_object(size: Size) -> pygame.Surface:
-        """
-        Creates an empty Surface of the given size,
-        filled with PygameVisualizer.BACKGROUND_COLOR.
-        """
-        output = pygame.Surface((size.x, size.y))
-        output.fill(PygameVisualizer.BACKGROUND_COLOR)
-        return output
+    # def create_rendered_object(size: Size) -> pygame.Surface:
+    #     """
+    #     Creates an empty Surface of the given size,
+    #     filled with PygameVisualizer.BACKGROUND_COLOR.
+    #     """
+    #     output = pygame.Surface((size.x, size.y))
+    #     output.fill(PygameVisualizer.BACKGROUND_COLOR)
+    #     return output
