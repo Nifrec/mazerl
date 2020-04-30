@@ -35,7 +35,6 @@ class GhostVisualizer(PygameVisualizer):
             # Velocity and acceleration are not needed, only the size 
             # and position.
             self.__ghost_ball = Ball(ball_pos[0], ball_pos[1], ball_rad)
-            self.__ghost_ball.pos = self.__ghost_ball.pos.round().astype(np.int)
             self.__is_first_render = False
 
         self.__clean_dirty_rect_ghost_ball(screen)
@@ -43,15 +42,16 @@ class GhostVisualizer(PygameVisualizer):
         self.__ghost_ball.pos = GhostVisualizer.GHOST_MOVEMENT_DELAY \
             * self.__ghost_ball.pos \
             + GhostVisualizer.GHOST_MOVEMENT_DELAY * ball_pos
-        self.__ghost_ball.pos = self.__ghost_ball.pos.round().astype(np.int)
         
         pygame.draw.circle(screen, GhostVisualizer.GHOST_COLOR,
-                self.__ghost_ball.pos,
+                self.__ghost_ball.pos.round().astype(np.int),
                 self.__ghost_ball.rad, 0)
 
     def __clean_dirty_rect_ghost_ball(self, screen: pygame.Surface):
-        dirty_rect_size = (2*self.__ghost_ball.rad, 2*self.__ghost_ball.rad)
-        dirty_rect = pygame.Rect(self.__ghost_ball.pos - self.__ghost_ball.rad,
+        # Make the rect 1 pixels larger in each direction (from center)
+        # to avoid position-rounding parts missing.
+        dirty_rect_size = (2*self.__ghost_ball.rad + 2, 2*self.__ghost_ball.rad + 2)
+        dirty_rect = pygame.Rect(self.__ghost_ball.pos.round().astype(np.int) - self.__ghost_ball.rad - 1,
                 dirty_rect_size)
         screen.blit(self._layout_surf, 
                 self.__ghost_ball.pos - self.__ghost_ball.rad,
