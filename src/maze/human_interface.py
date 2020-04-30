@@ -61,7 +61,7 @@ class HumanInterface():
         #self._screen.fill(backgroundcolor)
         pygame.display.flip()
         self.__model = Model(self.__size, BALL_RAD)
-        self.__visualizer = PygameVisualizer(self.__model)
+        self.__visualizer = GhostVisualizer(self.__model)
         self.create_random_maze()
         self.render_all()
         self.run()
