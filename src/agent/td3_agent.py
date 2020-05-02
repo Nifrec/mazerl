@@ -7,6 +7,7 @@ import numpy as np
 from agent.agent_class import Agent
 from agent.actor_network import ActorNetwork
 from agent.critic_network import CriticNetwork
+from .replay_memory import ReplayMemory
 
 class TD3Agent(Agent):
     """
@@ -61,7 +62,7 @@ class TD3Agent(Agent):
 
     def update_critic_net(self, batch):
         states, actions, rewards, next_states, dones \
-                = self.extract_experiences(batch)
+                = ReplayMemory.extract_experiences(batch, self.get_device())
         self.critic.train()
         self.actor.eval()
         
@@ -97,7 +98,8 @@ class TD3Agent(Agent):
         of the predicted action in that state (not from target but from normal
         networks).
         """
-        states, _, _, _, _ = self.extract_experiences(batch)
+        states, _, _, _, _ = ReplayMemory.extract_experiences(
+                batch, self.get_device())
         self.critic.eval()
         actions = self.actor.forward(states)
         q1, q2 = self.critic.forward(states, actions)

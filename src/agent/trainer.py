@@ -72,23 +72,32 @@ class Trainer:
         for episode in range(1, self.__hyperparameters.num_episodes+1):
             state = self.__env.reset()
             episode_rewards = []
-            # The neural networks only accept tensors as input.
-            state = torch.tensor([state], dtype=torch.float).to(self.__device)
+            # The neural networks only accept tensors on the same device.
+            # Will be copied to a new tensor for the optimization,
+            # so can safely disable gradient tracking here.
+            state = torch.tensor([state], dtype=torch.float, 
+                    requires_grad=False).to(self.__device)
             
             for timestep in range(self.__hyperparameters.max_episode_duration):
+                print(f"VRAM used:{torch.cuda.memory_allocated(device='cuda')} byte")
                 action = self.__choose_action(state, episode)
                 next_state, reward, done, _ = self.__env.step(
                         action[0].tolist())
                 episode_rewards += [reward]
                 # Store experience as 4 tensors, since used in neural networks.
                 next_state = torch.tensor([next_state],
-                        dtype=torch.float).to(self.__device)
-                reward = torch.tensor([reward], dtype=torch.int)\
-                        .to(self.__device)
-                done = torch.tensor([done], dtype=torch.bool)\
-                        .to(self.__device)
+                        dtype=torch.float)
+                reward = torch.tensor([reward], dtype=torch.int,
+                        requires_grad=False)
+                done = torch.tensor([done], dtype=torch.bool, 
+                        requires_grad=False)
+                # Store in RAM and move to VRAM when sampling from memory.
+                # Otherwise can easily run out of VRAM.
+                state.to(torch.device('cpu'))
+                action.to(torch.device('cpu'))
                 new_experience = Experience(state, action, reward, next_state,
                         done)
+                
                 replay_memory.push(new_experience)
 
                 if (replay_memory.can_sample(self.__hyperparameters.batch_size)):
@@ -101,7 +110,8 @@ class Trainer:
                             f"at timestep {timestep}")
                     break
                     
-                state = next_state
+                state.copy_(next_state)
+                state.to(self.__device)
                     
             self.__process_training_data(episode, rewards_per_episode,
                     episode_rewards)
