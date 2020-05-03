@@ -70,7 +70,7 @@ class Environment():
         done = died or won
         return self.create_observation_array(), reward, done
 
-    def __compute_reward(self, died: bool, won: bool) -> Number:
+    def __compute_reward(self, died: bool, won: bool) -> int:
         if died:
             return REWARD_DEATH
         elif won:

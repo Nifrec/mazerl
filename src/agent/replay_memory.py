@@ -1,10 +1,14 @@
 """
 Replay memory -- or experience buffer -- used to cache a set of recent
-experiences while training an egent with TD3/DDPG.
+experiences while training an agent with TD3 or DDPG.
 
 Author: Lulof Pirée
 """
 import random
+import torch
+from typing import Iterable, Tuple
+
+from .auxiliary import Experience
 
 class ReplayMemory():
     """
@@ -80,3 +84,41 @@ class ReplayMemory():
             # Now the next element is the oldest. 
             # Wrap to start when at end of list.
             self._current_idx = (self._current_idx + 1) % self._capacity
+
+    @staticmethod
+    def extract_experiences(experiences: Iterable[Experience]) \
+            -> Tuple[torch.Tensor, ...]:
+        """
+        Takes a batch of experiences and splits it into 4 tensors,
+        each containing either the states, awards, rewards or 
+        next_states of all experiences.
+
+        Arguments:
+        * experiences: list of Experience objects.
+
+        Returns:
+        A tuple with:
+        * states: rank-2 tensor of states of all experiences,
+            shape (num_experiences, 4).
+        * actions: rank-1 tensor of actions of all experiences.
+        * rewards: rank-1 tensor of rewards of all experiences.
+        * next_states: rank-1 tensor of next_states of all experiences.
+        * dones: rank-1 tensor of boolean dones (i.e. episode did end) of
+                all experiences.
+        """
+        batch = Experience(*zip(*experiences))
+        states = torch.cat(batch.state)
+        actions = torch.cat(batch.action)
+        rewards = torch.cat(batch.reward)
+        next_states = torch.cat(batch.next_state)
+        dones = torch.cat(batch.done)
+
+        # Detach copies without the computational graph.
+        # Without this call the old emptied computational graphs cause trouble.
+        states = states.detach()
+        actions = actions.detach()
+        rewards = rewards.detach()
+        next_states = next_states.detach()
+        dones = dones.detach()
+
+        return (states, actions, rewards, next_states, dones)

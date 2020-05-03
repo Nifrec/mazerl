@@ -17,17 +17,19 @@ import matplotlib
 import matplotlib.pyplot as plt
 import collections
 import os
+from typing import Tuple
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from agent.auxiliary import Experience, HyperparameterTuple
-from agent.critic_network import CriticNetwork
-from agent.actor_network import ActorNetwork
-from agent.logger import Logger
-from agent.auxiliary import Mode
+from .auxiliary import Experience, HyperparameterTuple
+from .critic_network import CriticNetwork
+from .actor_network import ActorNetwork
+from .logger import Logger
+from .auxiliary import Mode
+from .replay_memory import ReplayMemory
 
 
 class Agent():
@@ -78,7 +80,8 @@ class Agent():
         self.actor_optim = optim.Adam(params=self.actor.parameters(), 
                 lr=self.hyperparameters.learning_rate_actor)
         
-    def choose_action(self, state, select_random=False):
+    def choose_action(self, state: torch.Tensor, select_random: bool=False) \
+            -> Tuple[torch.Tensor, float]:
         """
         Query the actor-network and return the action chosen.
         Optionally random (normally )distributed noise in [-1, 1] can be added,
@@ -98,6 +101,7 @@ class Agent():
         """
         if (select_random):
             action = (torch.rand(self.hyperparameters.action_size)-0.5)*2
+            # Need to be on same device as network for value_estimation.
             action = action.unsqueeze(0).to(self.__device)
         else:
             noise_std = self.hyperparameters.exploration_noise_std
@@ -149,7 +153,7 @@ class Agent():
                 
     def update_critic_net(self, batch):
         states, actions, rewards, next_states, dones \
-            = self.extract_experiences(batch)
+            = ReplayMemory.extract_experiences(batch)
         self.critic.train()
         self.actor.eval()
         
@@ -183,7 +187,7 @@ class Agent():
         of the predicted action in that state (not from target but from normal
         networks).
         """
-        states, _, _, _, _ = self.extract_experiences(batch)
+        states, _, _, _, _ = ReplayMemory.extract_experiences(batch)
         self.critic.eval()
         actions = self.actor.forward(states)
         values = self.critic.forward(states, actions)
@@ -195,40 +199,6 @@ class Agent():
         self.actor.eval()
 
         return loss
-
-    def extract_experiences(self, experiences):
-        """
-        Takes a batch of experiences and splits it into 4 tensors,
-        each containing either the states, awards, rewards or 
-        next_states of all experiences.
-
-        Arguments:
-        * experiences: list of Experience objects.
-
-        Returns:
-        A tuple with:
-        * states: rank-2 tensor of states of all experiences,
-            shape (num_experiences, 4).
-        * actions: rank-1 tensor of actions of all experiences.
-        * rewards: rank-1 tensor of rewards of all experiences.
-        * next_states: rank-1 tensor of next_states of all experiences.
-        """
-        batch = Experience(*zip(*experiences))
-        states = torch.cat(batch.state)
-        actions = torch.cat(batch.action)
-        rewards = torch.cat(batch.reward)
-        next_states = torch.cat(batch.next_state)
-        dones = torch.cat(batch.done)
-
-        # Detach copies without the computational graph.
-        # Without this call the old emptied computational graphs cause trouble.
-        states = states.detach()
-        actions = actions.detach()
-        rewards = rewards.detach()
-        next_states = next_states.detach()
-        dones = dones.detach()
-
-        return (states, actions, rewards, next_states, dones)
 
     def update_target_networks(self):
         """
