@@ -79,9 +79,6 @@ class Agent():
                 lr=self.hyperparameters.learning_rate_critic)
         self.actor_optim = optim.Adam(params=self.actor.parameters(), 
                 lr=self.hyperparameters.learning_rate_actor)
-
-    def get_device(self) -> torch.device:
-        return self.__device
         
     def choose_action(self, state: torch.Tensor, select_random: bool=False) \
             -> Tuple[torch.Tensor, float]:
@@ -156,7 +153,7 @@ class Agent():
                 
     def update_critic_net(self, batch):
         states, actions, rewards, next_states, dones \
-            = ReplayMemory.extract_experiences(batch, self.__device)
+            = ReplayMemory.extract_experiences(batch)
         self.critic.train()
         self.actor.eval()
         
@@ -190,8 +187,7 @@ class Agent():
         of the predicted action in that state (not from target but from normal
         networks).
         """
-        states, _, _, _, _ = ReplayMemory.extract_experiences(
-                batch, self.__device)
+        states, _, _, _, _ = ReplayMemory.extract_experiences(batch)
         self.critic.eval()
         actions = self.actor.forward(states)
         values = self.critic.forward(states, actions)

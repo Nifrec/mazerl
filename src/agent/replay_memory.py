@@ -86,13 +86,12 @@ class ReplayMemory():
             self._current_idx = (self._current_idx + 1) % self._capacity
 
     @staticmethod
-    def extract_experiences(experiences: Iterable[Experience], 
-        device: torch.device) -> Tuple[torch.Tensor, ...]:
+    def extract_experiences(experiences: Iterable[Experience]) \
+            -> Tuple[torch.Tensor, ...]:
         """
         Takes a batch of experiences and splits it into 4 tensors,
         each containing either the states, awards, rewards or 
         next_states of all experiences.
-        Moves the tensors to the specified device.
 
         Arguments:
         * experiences: list of Experience objects.
@@ -116,10 +115,10 @@ class ReplayMemory():
 
         # Detach copies without the computational graph.
         # Without this call the old emptied computational graphs cause trouble.
-        states = states.detach().to(device)
-        actions = actions.detach().to(device)
-        rewards = rewards.detach().to(device)
-        next_states = next_states.detach().to(device)
-        dones = dones.detach().to(device)
+        states = states.detach()
+        actions = actions.detach()
+        rewards = rewards.detach()
+        next_states = next_states.detach()
+        dones = dones.detach()
 
         return (states, actions, rewards, next_states, dones)

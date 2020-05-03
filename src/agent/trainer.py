@@ -86,15 +86,11 @@ class Trainer:
                 episode_rewards += [reward]
                 # Store experience as 4 tensors, since used in neural networks.
                 next_state = torch.tensor([next_state],
-                        dtype=torch.float)
+                        dtype=torch.float).to(self.__device)
                 reward = torch.tensor([reward], dtype=torch.int,
-                        requires_grad=False)
+                        requires_grad=False).to(self.__device)
                 done = torch.tensor([done], dtype=torch.bool, 
-                        requires_grad=False)
-                # Store in RAM and move to VRAM when sampling from memory.
-                # Otherwise can easily run out of VRAM.
-                state.to(torch.device('cpu'))
-                action.to(torch.device('cpu'))
+                        requires_grad=False).to(self.__device)
                 new_experience = Experience(state, action, reward, next_state,
                         done)
                 
