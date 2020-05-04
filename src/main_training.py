@@ -9,10 +9,10 @@ import torch
 import gym
 import enum
 import multiprocessing
-from typing import Any, Tuple, Callable
+from typing import Any, Tuple
 # Local imports
-from agent.auxiliary import HyperparameterTuple, AsyncHyperparameterTuple, \
-        get_timestamp, setup_save_dir, make_setup_info_file, Mode
+from agent.auxiliary import HyperparameterTuple, get_timestamp, setup_save_dir,\
+        make_setup_info_file, Mode
 from agent.greyscale_env_wrapper import GreyScaleEnvironment as GreyscaleMazeEnv
 from agent.trainer import Trainer
 from agent.async_trainer import AsynchronousTrainer
@@ -31,7 +31,7 @@ class Environments(enum.Enum):
 
 def start_training(env_name: Environments, asynchronous: bool=False):
     checkpoint_dir = __create_checkpoint_dir_if_needed()
-    env = __create_environment_factory_function(env_name)
+    env = __create_environment(env_name)
     hyperparameters = __create_hyperparameters(checkpoint_dir, env)    
     __create_run_directory(hyperparameters)
     actor, critic = __create_networks(env_name)
@@ -72,11 +72,11 @@ def __create_run_directory(hyperparameters: HyperparameterTuple):
     setup_save_dir(hyperparameters.save_dir)
     make_setup_info_file(hyperparameters)\
 
-def __create_environment_factory_function(env_name: Environments) -> Callable:
-    if (env_name == Environments.maze):
-        return lambda : GreyscaleMazeEnv()
-    elif (env_name == Environments.lunarlander):
-        return lambda : gym.make("LunarLanderContinuous-v2")
+def __create_environment(env_name: Environments) -> Any:
+    if (env_name == Environments.lunarlander):
+        return gym.make("LunarLanderContinuous-v2")
+    elif (env_name == Environments.maze):
+        return GreyscaleMazeEnv()
     else:
         raise ValueError(f"Invalid environment name given:'{env_name}''")
 
@@ -135,7 +135,7 @@ def setup_actor_network(self):
 def __create_hyperparameters(checkpint_dir: str, env:Any) \
         -> HyperparameterTuple:
     output = HyperparameterTuple(
-            create_env_funct = env,
+            env = env,
             mode = settings.MODE, 
             device=settings.DEVICE,
             discount_rate=0.99,
@@ -148,49 +148,6 @@ def __create_hyperparameters(checkpint_dir: str, env:Any) \
             batch_size=settings.BATCH_SIZE,
             max_episode_duration=2000,
             memory_capacity=settings.REPLAY_MEMORY_CAP,
-            polyak=0.999,
-            # How many episodes between plot updates
-            plot_interval=50, 
-            moving_average_period=100,
-            # How many episodes between saving data to disk
-            checkpoint_interval=settings.CHECKPOINT_INTERVAL, 
-            action_size=2, # Length of action vector, depends on environment
-            # relative directory name to save networks and plot in
-            save_dir=os.path.join(checkpint_dir, get_timestamp() + "_" \
-                    + str(settings.MODE)),
-            # Amount of initial episodes in which only random actions are taken.
-            random_action_episodes=100,
-            # The following hyperparameters are only used by TD3 (not by DDPG).
-            # Noise added to action of target_actor during critic update.
-            td3_critic_train_noise_std=0.2,
-            # Noise will be clipped/clamped between this and negated this:
-            td3_critic_train_noise_bound=0.5,
-            # Amount of episodes between updating 
-            # target critic- and actor- networks.
-            td3_target_and_actor_update_interval=2
-    )
-    return output
-
-def __create_async_hyperparameters(checkpint_dir: str, env:Environments) \
-        -> AsyncHyperparameterTuple:
-    """
-    The asynchronous trainer does not use a batch size nor a replay
-    memory capacity. Also the environment cannot be initialized yet,
-    due to multiprocessing.
-    """
-    
-    output = AsyncHyperparameterTuple(
-            create_env_funct = env,
-            mode = settings.MODE, 
-            device=settings.DEVICE,
-            discount_rate=0.99,
-            learning_rate_critic=0.0003,
-            learning_rate_actor=0.0003,
-            exploration_noise_std=0.1,
-            min_action=-1.0,
-            max_action=1.0,
-            num_episodes=100000,
-            max_episode_duration=2000,
             polyak=0.999,
             # How many episodes between plot updates
             plot_interval=50, 
