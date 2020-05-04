@@ -38,6 +38,9 @@ from .td3_agent import TD3Agent
 class Trainer:
     """
     Class for training, saving and executing a DDPG or TD3 agent.
+
+    Does support logging of pre-trained-critic-estimations via the provided
+        logger.
     """
 
     def __init__(self, hyperparameters: HyperparameterTuple,
@@ -50,11 +53,11 @@ class Trainer:
         
         Arguments:
         * hyperparameters: HyperparameterTuple, with training setup.
-        * env_name: string, name of environment known by gym.
-        * mode: string, "DDPG" or "TD3"
+        * agent: agent to hold the actor and the critic and to choose moves.
+        * logger: instance to store meta-training data to a file.
         """
         self.__hyperparameters = hyperparameters
-        self.__env = hyperparameters.env
+        self.__env = hyperparameters.create_env_funct()
         self.__agent = agent
         self.__logger = logger
 
