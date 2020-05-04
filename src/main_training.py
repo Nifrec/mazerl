@@ -8,12 +8,14 @@ import os
 import torch
 import gym
 import enum
+import multiprocessing
 from typing import Any, Tuple
 # Local imports
 from agent.auxiliary import HyperparameterTuple, get_timestamp, setup_save_dir,\
         make_setup_info_file, Mode
-from agent.greyscale_env_wrapper import GreyScaleEnvironment as MazeEnv
+from agent.greyscale_env_wrapper import GreyScaleEnvironment as GreyscaleMazeEnv
 from agent.trainer import Trainer
+from agent.async_trainer import AsynchronousTrainer
 from agent.logger import Logger
 from agent.agent_class import Agent
 from agent.td3_agent import TD3Agent
@@ -27,7 +29,7 @@ class Environments(enum.Enum):
     maze = 1
     lunarlander = 2
 
-def start_training(env_name: Environments):
+def start_training(env_name: Environments, asynchronous: bool=False):
     checkpoint_dir = __create_checkpoint_dir_if_needed()
     env = __create_environment(env_name)
     hyperparameters = __create_hyperparameters(checkpoint_dir, env)    
@@ -36,7 +38,12 @@ def start_training(env_name: Environments):
     agent = __create_agent(hyperparameters, checkpoint_dir, actor, critic)
     
     logger = Logger(hyperparameters)
-    trainer = Trainer(hyperparameters, agent, logger)
+    if not asynchronous:
+        trainer = Trainer(hyperparameters, agent, logger)
+    else:
+        # CUDA demands this start method.
+        multiprocessing.set_start_method('spawn')
+        trainer = AsynchronousTrainer(hyperparameters, (agent,), logger, 5)
     
     trainer.train()
     
@@ -69,7 +76,7 @@ def __create_environment(env_name: Environments) -> Any:
     if (env_name == Environments.lunarlander):
         return gym.make("LunarLanderContinuous-v2")
     elif (env_name == Environments.maze):
-        return MazeEnv()
+        return GreyscaleMazeEnv()
     else:
         raise ValueError(f"Invalid environment name given:'{env_name}''")
 
