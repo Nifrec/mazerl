@@ -3,6 +3,7 @@ Helper functions of the DDPG/TD3 implementation.
 
 Author: Lulof Pirée (Nifrec).
 """
+from typing import Any
 import matplotlib.pyplot as plt
 import torch
 import time
@@ -10,6 +11,9 @@ import os
 import random
 import collections
 import enum
+import gym
+
+from .greyscale_env_wrapper import GreyScaleEnvironment
 
 # This is a class not an instance!
 # See main.py for example use and more explanation.
@@ -29,6 +33,29 @@ HyperparameterTuple = collections.namedtuple("HyperparameterTuple",
                                   "td3_critic_train_noise_bound",
                                   "td3_target_and_actor_update_interval"])
 
+# Does not have memory_capacity and batch_size, but sync_grad_interval instead.
+AsyncHyperparameterTuple = collections.namedtuple("HyperparameterTuple", 
+                                 [
+                                    # Most environments cannot be transported
+                                    # to a new process after initializing.
+                                    "env_enum_name", 
+                                    "mode", "device",
+                                    "discount_rate", "learning_rate_critic",
+                                    "learning_rate_actor",
+                                    "exploration_noise_std",
+                                    "min_action", "max_action",
+                                    "num_episodes",
+                                    "max_episode_duration",
+                                    "polyak",
+                                    "plot_interval", "moving_average_period", 
+                                    "checkpoint_interval", "action_size",
+                                    "save_dir", "random_action_episodes",
+                                    "td3_critic_train_noise_std",
+                                    "td3_critic_train_noise_bound",
+                                    "td3_target_and_actor_update_interval",
+                                    "sync_grad_interval"
+                                  ])
+
 # This is a class not an instance!
 Experience = collections.namedtuple("Experience", 
         ["state", "action", "reward", "next_state", "done"])
@@ -36,6 +63,10 @@ Experience = collections.namedtuple("Experience",
 class Mode(enum.Enum):
     DDPG = 1
     TD3 = 2
+
+class Environments(enum.Enum):
+    maze = 1
+    lunarlander = 2
 
 def compute_moving_average(values, period):
     """
@@ -170,3 +201,11 @@ def clip(value, minimum, maximum):
     NOTE: also available as toch.clamp(...). This will return a tensor.
     """
     return max(min(value, maximum), minimum)
+
+def create_environment(env_name: Environments) -> Any:
+    if (env_name == Environments.lunarlander):
+        return gym.make("LunarLanderContinuous-v2")
+    elif (env_name == Environments.maze):
+        return GreyScaleEnvironment()
+    else:
+        raise ValueError(f"Invalid environment name given:'{env_name}''")

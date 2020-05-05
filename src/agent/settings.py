@@ -24,5 +24,8 @@ BATCH_SIZE = 16
 REPLAY_MEMORY_CAP = 10000
 CHECKPOINT_INTERVAL=100
 
+# Asynchronous mode hyperparameters:
+SYNC_GRAD_INTERVAL = 10
+
 
 

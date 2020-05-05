@@ -30,16 +30,22 @@ parser.add_argument("-d", "--checkpoint-directory", required=False,
 parser.add_argument("-e", "--environment", required=False, 
         help="environment to use for training (default: maze)",
         choices=ENVIRONMENTS, default="maze")
+parser.add_argument('-a', "--asynchronous", action='store_true',
+        help="Use Asynchronous Methods during training." \
+            +" Only used for 'train' command.")
 args = parser.parse_args()
 
 if (args.command == "human"):
     from maze.human_interface import HumanInterface
     HumanInterface()
 elif (args.command == "train"):
+    asynchronous = args.asynchronous
     if args.environment == "maze":
-        main_training.start_training(main_training.Environments.maze)
+        main_training.start_training(main_training.Environments.maze,
+                asynchronous)
     elif args.environment == "gym-lunarlander":
-        main_training.start_training(main_training.Environments.lunarlander)
+        main_training.start_training(main_training.Environments.lunarlander,
+                asynchronous)
 
 elif (args.command == "load"):
     print(args.checkpoint_dir)
