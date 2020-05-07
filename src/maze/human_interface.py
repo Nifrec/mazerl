@@ -36,6 +36,7 @@ GAME_OVER_TIME = 1
 BALL_RAD = 10
 MAZE_OFFSET = 60
 ACC_INCR_BUTTON_PRESS = 0.1
+IS_HAT_ENABLED = False
 
 
 class HumanInterface():
@@ -43,9 +44,18 @@ class HumanInterface():
     def __init__(self, fps: Number = FPS, 
             width: Number = WINDOW_WIDTH, height: Number = WINDOW_HEIGHT,
             fullscreen: bool=False):
-        
-        
+
         pygame.init()
+
+        # joystick initialization
+        pygame.joystick.init()
+        self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+        print(len(self.joysticks))
+        for joystick in self.joysticks:
+            joystick.init()
+        if len(self.joysticks > 0):
+            self.controller = self.joysticks[0]
+
         pygame.display.set_caption("MazeRL Human Interface")
         self.__size = Size(width, height)
         self.__maze_gen = MazeGenerator(self.__size, BALL_RAD, MAZE_OFFSET)
@@ -71,6 +81,8 @@ class HumanInterface():
         self.__is_running = True
         while(self.__is_running):
             self.__clock.tick(self.__fps)
+            if IS_HAT_ENABLED:
+                self.step()
             self.process_events()
             self.process_model()
             self.render_update_ball()
@@ -94,6 +106,15 @@ class HumanInterface():
 
                 if (event.key == pygame.K_F1):
                     self.create_random_maze()
+
+        # if a compatible joystick/controller is plugged in
+        if self.controller:
+            # get x and y axis positions of the stick (between -1.0 and 1.0).
+            x_axis = self.controller.get_axis(0)
+            y_axis = self.controller.get_axis(1)
+
+            # set acceleration proportional to state of joystick axes
+            self.__model.set_acceleration(ACC_INCR_BUTTON_PRESS * x_axis, ACC_INCR_BUTTON_PRESS * y_axis)
         
         self.process_held_keys()
 
@@ -186,6 +207,35 @@ class HumanInterface():
         layout = MazeLayout(lines, start, end, self.__size)
 
         self.__model.reset(layout)
+
+    def step(self):
+        """
+        Takes a chosen action and computes the next time-step of the
+        simulation.
+
+        Arguments:
+        * action: iterable of 2 floats,
+                chosen x- and y-acceleration respectively.
+
+        Returns:
+            * observation: 3D numpy int-type ndarray,
+                    RGB representation of reached state (screenshot).
+                    (shape: channel(=3) x width x heigth)
+            * reward: Number, rewards obtained for the given action.
+            * done: bool, whether the reached state is the final state of
+                    an episode.
+        """
+        pass
+        # if (len(action) != 2):
+        #     raise ValueError(self.__class__.__name__
+        #                      + "step(): expected exactly two numbers in action")
+        #
+        # self.__model.set_acceleration(action[0], action[1])
+        # died = not self.__model.make_timestep()
+        # won = self.__model.is_ball_at_finish()
+        # reward = self.__compute_reward(died, won)
+        # done = died or won
+        # return self.create_observation_array(), reward, done
 
 
 if __name__ == "__main__":
