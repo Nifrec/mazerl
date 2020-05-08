@@ -40,7 +40,10 @@ class Environment():
         self.__model = Model(size, BALL_RAD)
         self.__generator = MazeGenerator(size, BALL_RAD, MAZE_OFFSET)
         self.__visualizer = GhostVisualizer(self.__model)
-        self.__init_display()
+        # Create empty Surface, will be overriden with the display
+        # Surface if render() is called.
+        self.__screen = pygame.Surface((self.__size.x, self.__size.y))
+        self.__pygame_is_initialized = False
 
     def step(self, action: Iterable) -> Tuple[np.ndarray, Number, bool]:
         """
@@ -100,15 +103,17 @@ class Environment():
         return self.create_observation_array()
 
     def render(self):
-        pygame.display.flip()
+        if not self.__pygame_is_initialized:
+            pygame.init()
+            pygame.display.set_caption("MazeRL AI Interface")
+            old_screen = self.__screen
+            # Was non-displayed Surface, now becomes actual screen Surface.
+            self.__screen = pygame.display.set_mode(
+                    (self.__size.x, self.__size.y)
+            )
+            self.__screen.blit(old_screen, (0, 0))
 
-    def __init_display(self):
-        """
-        Launch the pygame window.
-        """
-        pygame.init()
-        pygame.display.set_caption("MazeRL AI Interface")
-        self.__screen = pygame.display.set_mode((self.__size.x, self.__size.y))
+        pygame.display.flip()
 
     def __update_display(self):
         """
