@@ -40,7 +40,7 @@ class Agent():
     * Select and clip actions.
     """
 
-    def __init__(self, hyperparameters, 
+    def __init__(self, hyperparameters: HyperparameterTuple, 
             actor_net: ActorNetwork, critic_net: CriticNetwork):
         """
         Initialize the agent.
