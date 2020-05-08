@@ -18,6 +18,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import collections
 import os
+import threading
 import multiprocessing
 
 import torch
@@ -27,16 +28,18 @@ import torch.nn.functional as F
 
 from .network import Network
 from .replay_memory import ReplayMemory
-from agent.auxiliary import Experience, AsyncHyperparameterTuple
-from .auxiliary import compute_moving_average, \
+from agent.auxiliary import Experience
+from agent.auxiliary import compute_moving_average, \
         compute_moving_average_when_enough_values, \
         plot_reward_and_moving_average, clip,\
         setup_save_dir, make_setup_info_file, \
-        create_environment
+        create_environment, Environments
+import agent.auxiliary
         
 from .logger import Logger
 from .agent_class import Agent
 from .td3_agent import TD3Agent
+from agent.settings import create_async_hyperparameters
 
 
 
@@ -50,7 +53,7 @@ class AsynchronousTrainer:
         provided logger.
     """
 
-    def __init__(self, hyperparameters: AsyncHyperparameterTuple,
+    def __init__(self, checkpoint_dir: str, env_enum_name: Environments,
             agents: Tuple[Agent, ...], logger: Logger, num_processes: int):
         """
         Initialize the TD3 training algorithm, set up Gym environment,
@@ -64,7 +67,8 @@ class AsynchronousTrainer:
             agents. If higher than the number of agents will wrap around
             the agent list.
         """
-        self.__hyperparameters = hyperparameters
+        self.__checkpoint_dir = checkpoint_dir
+        self.__env_name = env_enum_name
         self.__agents = agents
         self.__logger = logger
         self.__num_processes = num_processes
@@ -73,7 +77,6 @@ class AsynchronousTrainer:
                 torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def train(self):
-
         gradientQueue = multiprocessing.Queue()
         processes = []
 
@@ -83,11 +86,20 @@ class AsynchronousTrainer:
             agent = self.__agents[i]
             i = (i + 1) % num_agents
 
-            worker = AgentWorker(self.__hyperparameters, agent, 
-                    self.__logger, gradientQueue)
-            p = multiprocessing.Process(target=worker.run)
+            
+            p = multiprocessing.Process(target=create_worker_and_run, 
+                    args=[self.__checkpoint_dir, self.__env_name, agent,
+                    self.__logger, gradientQueue])
             processes.append(p)
             p.start()
+
+def create_worker_and_run(checkpoint_dir: str, env_enum_name: Environments,
+        agent: Agent, logger: Logger, gradientQueue: multiprocessing.Queue):
+        worker = AgentWorker(checkpoint_dir, env_enum_name, agent, 
+                    logger, gradientQueue)
+        worker.run()
+
+        
 
 class AgentWorker:
     """
@@ -96,7 +108,7 @@ class AgentWorker:
     respect to the weights of ther actor- and critic-networks.
     """
 
-    def __init__(self, hyperparameters: AsyncHyperparameterTuple,
+    def __init__(self, checkpoint_dir: str, env_enum_name: Environments,
         agent: Agent, logger: Logger, gradientQueue: multiprocessing.Queue):
         """
         Arguments:
@@ -107,8 +119,8 @@ class AgentWorker:
             of (actor_grad, critic_grad), i.e. optimization changes
             to add to parameters of networks.
         """
-        self.__hyperparameters = hyperparameters
-        self.__env = create_environment(hyperparameters.env_enum_name)
+        self.__hyperparameters = create_async_hyperparameters(checkpoint_dir, env_enum_name)
+        self.__env = create_environment(self.__hyperparameters.env_enum_name)
         self.__agent = agent
         self.__logger = logger
         self.__queue = gradientQueue
