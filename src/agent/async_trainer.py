@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import collections
 import os
 import multiprocessing
+import threading
 
 import torch
 import torch.nn as nn
@@ -85,7 +86,8 @@ class AsynchronousTrainer:
 
             worker = AgentWorker(self.__hyperparameters, agent, 
                     self.__logger, gradientQueue)
-            p = multiprocessing.Process(target=worker.run)
+            #p = multiprocessing.Process(target=worker.run)
+            p = threading.Thread(target=worker.run)
             processes.append(p)
             p.start()
 
@@ -116,7 +118,8 @@ class AgentWorker:
     def run(self):
         
         for episode in range(1, self.__hyperparameters.num_episodes+1):
-            print(f"I (id:{id(self)}) ep:{episode}")
+            print(f"Worker (id:{id(self)}, pid:{os.getpid()}) " \
+                    + "starts ep:{episode}")
             device = self.__hyperparameters.device
             state = self.__env.reset()
             episode_rewards = []
@@ -127,7 +130,6 @@ class AgentWorker:
                     requires_grad=False).to(device)
             
             for timestep in range(self.__hyperparameters.max_episode_duration):
-                print(f"VRAM used:{torch.cuda.memory_allocated(device='cuda')} byte")
                 action = self.__choose_action(state, episode)
                 next_state, reward, done, _ = self.__env.step(
                         action[0].tolist())
