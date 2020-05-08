@@ -11,9 +11,9 @@ import enum
 import multiprocessing
 from typing import Any, Tuple
 # Local imports
-from agent.auxiliary import get_timestamp, setup_save_dir,\
-    make_setup_info_file, Mode, Environments, create_environment, \
-        HyperparameterTuple, AsyncHyperparameterTuple
+from agent.auxiliary import HyperparameterTuple, AsyncHyperparameterTuple, \
+    get_timestamp, setup_save_dir,\
+    make_setup_info_file, Mode, Environments, create_environment
 from agent.trainer import Trainer
 from agent.async_trainer import AsynchronousTrainer
 from agent.logger import Logger
@@ -25,25 +25,13 @@ from agent.actor_network_convolutional import ActorCNN
 from agent.critic_network_convolutional import CriticCNN
 import agent.settings as settings
 
-# def start_training(env_name: Environments, asynchronous: bool = False):
-#     checkpoint_dir = __create_checkpoint_dir_if_needed()
-#     env = create_environment(env_name)
-#     hyperparameters = __create_hyperparameters(checkpoint_dir, env)
-#     __create_run_directory(hyperparameters)
-#     actor, critic = __create_networks(env_name)
-#     agent = __create_agent(hyperparameters, checkpoint_dir, actor, critic)
-
-#     logger = Logger(hyperparameters)
-#     trainer = Trainer(hyperparameters, agent, logger)
-#     trainer.train()
-
 def start_training(env_name: Environments, asynchronous: bool = False):
     checkpoint_dir = __create_checkpoint_dir_if_needed()
     if not asynchronous:
         env = create_environment(env_name)
         hyperparameters = __create_hyperparameters(checkpoint_dir, env)
     else:
-        hyperparameters = create_async_hyperparameters(checkpoint_dir, env_name)
+        hyperparameters = __create_async_hyperparameters(checkpoint_dir, env_name)
     __create_run_directory(hyperparameters)
     actor, critic = __create_networks(env_name)
     agent = __create_agent(hyperparameters, checkpoint_dir, actor, critic)
@@ -54,31 +42,10 @@ def start_training(env_name: Environments, asynchronous: bool = False):
     else:
         # CUDA demands this start method.
         multiprocessing.set_start_method('spawn')
-        trainer = AsynchronousTrainer(checkpoint_dir, env_name, (agent,), logger, 5)
+        trainer = AsynchronousTrainer(hyperparameters, (agent,), logger, 5)
 
     trainer.train()
-    
-# def start_single_agent_training():
-#     """
-#     Starts default (non-parallellized) training.
-#     """
-#     env = create_environment(env_name)
-#     hyperparameters = __create_hyperparameters(checkpoint_dir, env)
-#     __create_run_directory(hyperparameters)
-#     actor, critic = __create_networks(env_name)
-#     agent = __create_agent(hyperparameters, checkpoint_dir, actor, critic)
-#     logger = Logger(hyperparameters)
-#     trainer = Trainer(hyperparameters, agent, logger)
-#     trainer.train()
 
-# def start_asynchronous_training():
-#     """
-#     Starts parallellized training. Has a more involved setup.
-#     """
-#     hyperparameters = __create_async_hyperparameters(checkpoint_dir, env_name)
-#     # CUDA demands this start method.
-#     multiprocessing.set_start_method('spawn')
-#     trainer = AsynchronousTrainer(hyperparameters, (agent,), logger, 5)
 
 def __create_checkpoint_dir_if_needed() -> str:
     """
@@ -108,8 +75,7 @@ def __create_run_directory(hyperparameters: HyperparameterTuple):
 
 
 def __create_agent(hyperparameters: HyperparameterTuple,
-                   checkpoint_dir: str, actor: ActorNetwork,
-                   critic: CriticNetwork) -> Agent:
+                   checkpoint_dir: str, actor: ActorNetwork, critic: CriticNetwork) -> Agent:
     agent: Agent
 
     if (settings.MODE == Mode.TD3):
@@ -202,7 +168,7 @@ def __create_hyperparameters(checkpint_dir: str, env: Any) \
     )
     return output
 
-def create_async_hyperparameters(checkpoint_dir: str, env: Environments) \
+def __create_async_hyperparameters(checkpint_dir: str, env: Environments) \
         -> AsyncHyperparameterTuple:
     """
     The asynchronous trainer does not use a batch size nor a replay
@@ -232,7 +198,7 @@ def create_async_hyperparameters(checkpoint_dir: str, env: Environments) \
         checkpoint_interval=settings.CHECKPOINT_INTERVAL,
         action_size=2,  # Length of action vector, depends on environment
         # relative directory name to save networks and plot in
-        save_dir=os.path.join(checkpoint_dir, get_timestamp() + "_" \
+        save_dir=os.path.join(checkpint_dir, get_timestamp() + "_" \
                               + str(settings.MODE)),
         # Amount of initial episodes in which only random actions are taken.
         random_action_episodes=100,
