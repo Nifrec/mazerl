@@ -3,8 +3,11 @@ Various settings for the program launcher and training hyperparameters.
 
 Author: Lulof Pirée
 """
-from agent.auxiliary import Mode
+# Library imports
 import torch
+
+# Local imports
+from agent.auxiliary import Mode, Environments, get_timestamp
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Parent directory of all checkpoint directories:
