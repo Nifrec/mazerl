@@ -187,6 +187,27 @@ class HumanInterface():
         self.__model.reset(self.__maze_gen.generate_maze())
         pygame.display.flip()
 
+    def create_observation_array(self) -> np.ndarray:
+        red = pygame.surfarray.pixels_red(self.__screen)
+        green = pygame.surfarray.pixels_green(self.__screen)
+        blue = pygame.surfarray.pixels_blue(self.__screen)
+        return np.array([red, green, blue])
+
+    def record_training_example(self):
+        state = self.create_observation_array()
+        action = (self.x_acc, self.y_acc)
+
+        self.episode_states.append(state)
+        self.episode_actions.append(action)
+
+    def store_episode_data(self):
+        episode_data = {'state': self.episode_states, 'action': self.episode_actions}
+        # make timestamp to ensure unique file naming
+        now = time.localtime(time.time())
+        timestamp = "{}-{}-{}_{}:{}:{}".format(now.tm_mday, now.tm_mon, now.tm_year, now.tm_hour, now.tm_min, now.tm_sec)
+        # store data from completed episode as a csv file
+        pd.DataFrame(episode_data).to_csv(timestamp)
+
     def __create_test_maze(self):
         """
         Creates a simple hard-coded maze to test the rendering.
@@ -220,25 +241,6 @@ class HumanInterface():
         layout = MazeLayout(lines, start, end, self.__size)
 
         self.__model.reset(layout)
-
-    def create_observation_array(self) -> np.ndarray:
-        red = pygame.surfarray.pixels_red(self.__screen)
-        green = pygame.surfarray.pixels_green(self.__screen)
-        blue = pygame.surfarray.pixels_blue(self.__screen)
-        return np.array([red, green, blue])
-
-    def record_training_example(self):
-        state = self.create_observation_array()
-        action = (self.x_acc, self.y_acc)
-
-        self.episode_states.append(state)
-        self.episode_actions.append(action)
-
-    def store_episode_data(self):
-        episode_data = {'state': self.episode_states, 'action': self.episode_actions}
-        now = time.localtime(time.time())
-        timestamp = "{}-{}-{}_{}:{}:{}".format(now.tm_mday, now.tm_mon, now.tm_year, now.tm_hour, now.tm_min, now.tm_sec)
-        pd.DataFrame(episode_data).to_csv(timestamp)
 
 
 
