@@ -18,6 +18,7 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 import numpy as np
 import time
+import pandas as pd
 
 from maze.model import Model, MazeLayout
 from maze.record_types import Size, Line
@@ -36,7 +37,7 @@ GAME_OVER_TIME = 1
 BALL_RAD = 10
 MAZE_OFFSET = 60
 ACC_INCR_BUTTON_PRESS = 0.1
-IS_HAT_ENABLED = False
+IS_HAT_ENABLED = True
 
 
 class HumanInterface():
@@ -53,8 +54,15 @@ class HumanInterface():
         print(len(self.joysticks))
         for joystick in self.joysticks:
             joystick.init()
-        if len(self.joysticks > 0):
+        if len(self.joysticks) > 0:
             self.controller = self.joysticks[0]
+
+        if IS_HAT_ENABLED:
+            self.episode_states = []
+            self.episode_actions = []
+
+        self.x_acc = 0
+        self.y_acc = 0
 
         pygame.display.set_caption("MazeRL Human Interface")
         self.__size = Size(width, height)
@@ -81,10 +89,10 @@ class HumanInterface():
         self.__is_running = True
         while(self.__is_running):
             self.__clock.tick(self.__fps)
-            if IS_HAT_ENABLED:
-                self.step()
             self.process_events()
             self.process_model()
+            if IS_HAT_ENABLED:
+                self.record_training_example()
             self.render_update_ball()
             pygame.display.flip()
         pygame.quit()
@@ -113,8 +121,11 @@ class HumanInterface():
             x_axis = self.controller.get_axis(0)
             y_axis = self.controller.get_axis(1)
 
+            self.x_acc = ACC_INCR_BUTTON_PRESS * x_axis
+            self.y_acc = ACC_INCR_BUTTON_PRESS * y_axis
+
             # set acceleration proportional to state of joystick axes
-            self.__model.set_acceleration(ACC_INCR_BUTTON_PRESS * x_axis, ACC_INCR_BUTTON_PRESS * y_axis)
+            self.__model.set_acceleration(self.x_acc, self.y_acc)
         
         self.process_held_keys()
 
@@ -139,10 +150,12 @@ class HumanInterface():
         self.__model.set_acceleration(0, 0)
         if (hit_wall):
             self.death_screen()
+            self.store_episode_data()
             self.create_random_maze()
             self.render_all()
         elif (self.__model.is_ball_at_finish()):
             self.win_screen()
+            self.store_episode_data()
             self.create_random_maze()
             self.render_all()
 
@@ -208,34 +221,27 @@ class HumanInterface():
 
         self.__model.reset(layout)
 
-    def step(self):
-        """
-        Takes a chosen action and computes the next time-step of the
-        simulation.
+    def create_observation_array(self) -> np.ndarray:
+        red = pygame.surfarray.pixels_red(self.__screen)
+        green = pygame.surfarray.pixels_green(self.__screen)
+        blue = pygame.surfarray.pixels_blue(self.__screen)
+        return np.array([red, green, blue])
 
-        Arguments:
-        * action: iterable of 2 floats,
-                chosen x- and y-acceleration respectively.
+    def record_training_example(self):
+        state = self.create_observation_array()
+        action = (self.x_acc, self.y_acc)
 
-        Returns:
-            * observation: 3D numpy int-type ndarray,
-                    RGB representation of reached state (screenshot).
-                    (shape: channel(=3) x width x heigth)
-            * reward: Number, rewards obtained for the given action.
-            * done: bool, whether the reached state is the final state of
-                    an episode.
-        """
-        pass
-        # if (len(action) != 2):
-        #     raise ValueError(self.__class__.__name__
-        #                      + "step(): expected exactly two numbers in action")
-        #
-        # self.__model.set_acceleration(action[0], action[1])
-        # died = not self.__model.make_timestep()
-        # won = self.__model.is_ball_at_finish()
-        # reward = self.__compute_reward(died, won)
-        # done = died or won
-        # return self.create_observation_array(), reward, done
+        self.episode_states.append(state)
+        self.episode_actions.append(action)
+
+    def store_episode_data(self):
+        episode_data = {'state': self.episode_states, 'action': self.episode_actions}
+        now = time.localtime(time.time())
+        timestamp = "{}-{}-{}_{}:{}:{}".format(now.tm_mday, now.tm_mon, now.tm_year, now.tm_hour, now.tm_min, now.tm_sec)
+        pd.DataFrame(episode_data).to_csv(timestamp)
+
+
+
 
 
 if __name__ == "__main__":
