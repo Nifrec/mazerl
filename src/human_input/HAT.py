@@ -1,7 +1,6 @@
 import pandas as pd
 import sklearn
 from sklearn.svm import SVC
-import random
 import numpy as np
 import shutil
 import glob

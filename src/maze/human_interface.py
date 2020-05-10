@@ -244,8 +244,5 @@ class HumanInterface():
         self.__model.reset(layout)
 
 
-
-
-
 if __name__ == "__main__":
     hi = HumanInterface(FPS, WINDOW_WIDTH, WINDOW_HEIGHT, FULLSCREEN)
