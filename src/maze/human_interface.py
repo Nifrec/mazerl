@@ -204,9 +204,10 @@ class HumanInterface():
         episode_data = {'state': self.episode_states, 'action': self.episode_actions}
         # make timestamp to ensure unique file naming
         now = time.localtime(time.time())
-        timestamp = "{}-{}-{}_{}:{}:{}".format(now.tm_mday, now.tm_mon, now.tm_year, now.tm_hour, now.tm_min, now.tm_sec)
+        timestamp = "{}-{}-{}_{}:{}:{}".format(now.tm_mday, now.tm_mon, now.tm_year, str(now.tm_hour).rjust(2, '0'),
+                                               str(now.tm_min).rjust(2, '0'), str(now.tm_sec).rjust(2, '0'))
         # store data from completed episode as a csv file
-        pd.DataFrame(episode_data).to_csv(timestamp)
+        pd.DataFrame(episode_data).to_csv("./human_input/training_data/" + timestamp + ".csv")
 
     def __create_test_maze(self):
         """
