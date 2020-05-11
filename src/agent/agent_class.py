@@ -164,10 +164,10 @@ class Agent():
         #for net1,net2 in zip(A.named_parameters(),B.named_parameters()):
         #        net2[1].grad = net1[1].grad.clone()
         critic_grad = [
-                param[1].grad.clone() for param in self.critic.named_parameters()
+                param[1].grad.clone().cpu() for param in self.critic.named_parameters()
         ]
         actor_grad = [
-                param[1].grad.clone() for param in self.actor.named_parameters()
+                param[1].grad.clone().cpu() for param in self.actor.named_parameters()
         ]
         return critic_grad, actor_grad
 
