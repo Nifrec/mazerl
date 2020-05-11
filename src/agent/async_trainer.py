@@ -91,7 +91,7 @@ class AsynchronousTrainer:
             processes.append(p)
             p.start()
 
-    def process_gradient_queue(self):
+    def process_gradient_queue(self, gradientQueue: multiprocessing.Queue):
         """
         Enter a loop in which a gradientQueue is constantly being checked
         for new gradients. When any occur they are used to
@@ -123,6 +123,7 @@ class AgentWorker:
 
         # Shorthand for often used hyperparameter.
         self.__device = self.__hyperparameters.device
+        self.__sync_grad_interval = self.__hyperparameters.sync_grad_interval
 
     def run(self):
         
@@ -141,6 +142,9 @@ class AgentWorker:
             for timestep in range(self.__hyperparameters.max_episode_duration):
                 reward, next_state, done = self.__make_timestep(state, episode)
                 episode_rewards.append(reward.item())
+
+                if done.item() or (timestep % self.__sync_grad_interval == 0):
+                    self.__collect_gradients()
 
                 if done.item():
                     break
