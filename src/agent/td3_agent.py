@@ -4,6 +4,8 @@ Lulof Pirée (Nifrec)
 """
 import torch
 import numpy as np
+from typing import Iterable
+
 from agent.agent_class import Agent
 from agent.actor_network import ActorNetwork
 from agent.critic_network import CriticNetwork
@@ -52,6 +54,7 @@ class TD3Agent(Agent):
                 to optimize the networks) for critic and actor respectively.
                 actor_loss may be None if it is not time to update the actor.
         """
+        self.reset_gradients()
         critic_loss = self.update_critic_net(batch).item()
         actor_loss = None
         if (episode % self.hyperparameters.td3_target_and_actor_update_interval\
@@ -60,7 +63,7 @@ class TD3Agent(Agent):
                 self.update_target_networks()
         return critic_loss, actor_loss
 
-    def update_critic_net(self, batch):
+    def update_critic_net(self, batch: Iterable,  gradient_only: bool=False):
         states, actions, rewards, next_states, dones \
                 = ReplayMemory.extract_experiences(batch)
         self.critic.train()
@@ -86,13 +89,13 @@ class TD3Agent(Agent):
         # Perform backprop
         loss = ((targets - values_q1)**2).mean() \
                 + ((targets - values_q2)**2).mean()
-        self.critic_optim.zero_grad()
         loss.backward()
-        self.critic_optim.step()
+        if not gradient_only:
+            self.critic_optim.step()
         self.critic.eval()
         return loss
                 
-    def update_actor_net(self, batch):
+    def update_actor_net(self, batch: Iterable, gradient_only: bool=False):
         """
         Perform forward prop on actor, with as loss the predicted value
         of the predicted action in that state (not from target but from normal
@@ -103,11 +106,13 @@ class TD3Agent(Agent):
         actions = self.actor.forward(states)
         q1, q2 = self.critic.forward(states, actions)
         values = torch.min(q1, q2)
-        self.actor.train()
+
+        # Perform backprop
         self.actor_optim.zero_grad()
         loss = ((-1*values).mean())
         loss.backward()
-        self.actor_optim.step()
+        if not gradient_only:
+            self.actor_optim.step()
         self.actor.eval()
 
         return loss

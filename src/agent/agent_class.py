@@ -17,7 +17,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import collections
 import os
-from typing import Tuple
+from typing import Tuple, Iterable
 
 import torch
 import torch.nn as nn
@@ -133,7 +133,7 @@ class Agent():
         """
         return self.critic.forward(state, action).item()
 
-    def update(self, batch, episode):
+    def update(self, batch: Tuple, episode: int):
         """
         Takes a batch of Experience instances and uses them to update the
         inference networks using gradient ascent/descent.
@@ -141,17 +141,49 @@ class Agent():
         * batch: iterable of Experience instances.
         * episode: unused, only here to provide same interface as
                 TD3Agent.
+        
 
         Returns:
         * critic_loss, actor_loss: floats, losses (i.e. values used
                 to optimize the networks) for critic and actor respectively.
         """
+        self.reset_gradients()
         critic_loss = self.update_critic_net(batch).item()
         actor_loss = self.update_actor_net(batch).item()
         self.update_target_networks()
         return critic_loss, actor_loss
                 
-    def update_critic_net(self, batch):
+    def get_gradients(self) -> Tuple[list, list]:
+        """
+        Returns a list of the the gradient part of the parameters,
+        for both networks.
+        The gradients are in order of the parameters as returned by
+        nn.Module.named_parameters()
+        """
+        # https://discuss.pytorch.org/t/please-help-how-can-copy-the-gradient-from-net-a-to-net-b/41226/8
+        #for net1,net2 in zip(A.named_parameters(),B.named_parameters()):
+        #        net2[1].grad = net1[1].grad.clone()
+        critic_grad = [
+                param[1].grad.clone for param in self.critic.named_parameters()
+        ]
+        actor_grad = [
+                param[1].grad.clone for param in self.actor.named_parameters()
+        ]
+        return critic_grad, actor_grad
+
+    def reset_gradients(self):
+        """
+        Sets the accumulated gradients in the actor and critic networks to 0.
+        """
+        self.actor_optim.zero_grad()
+        self.critic_optim.zero_grad()
+
+    def update_critic_net(self, batch: Iterable, gradient_only: bool=False):
+        """
+        * gradient_only: bool, if flagged True will compute the gradient but
+                not modify network weights. 
+        NOTE: Will not erase previous gradients (so they accumulate instead)
+        """
         states, actions, rewards, next_states, dones \
             = ReplayMemory.extract_experiences(batch)
         self.critic.train()
@@ -171,31 +203,34 @@ class Agent():
                     * self.hyperparameters.discount_rate * target_values
         
         # Perform backprop
-        self.critic_optim.zero_grad()
         loss = ((targets - values)**2).mean()
         loss.backward()
-        self.critic_optim.step()
+        if not gradient_only:
+            self.critic_optim.step()
         self.critic.eval()
         return loss
 
     def compute_target_action(self, next_states):
         return self.actor_target.forward(next_states)
 
-    def update_actor_net(self, batch):
+    def update_actor_net(self, batch: Iterable, gradient_only: bool=False):
         """
         Perform forward prop on actor, with as loss the predicted value
         of the predicted action in that state (not from target but from normal
         networks).
+        * gradient_only: bool, if flagged True will compute the gradient but
+                not modify network weights.
+        NOTE: Will not erase previous gradients (so they accumulate instead).
         """
         states, _, _, _, _ = ReplayMemory.extract_experiences(batch)
         self.critic.eval()
         actions = self.actor.forward(states)
         values = self.critic.forward(states, actions)
         self.actor.train()
-        self.actor_optim.zero_grad()
         loss = ((-1*values).mean())
         loss.backward()
-        self.actor_optim.step()
+        if not gradient_only:
+            self.actor_optim.step()
         self.actor.eval()
 
         return loss
