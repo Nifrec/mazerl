@@ -7,3 +7,6 @@ checkpoints
 
 # Ignore pycaches
 __pycache__
+
+# Ignore .DS_Store
+.DS_Store
