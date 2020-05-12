@@ -76,7 +76,8 @@ class AsynchronousTrainer:
 
     def train(self):
 
-        gradientQueue = multiprocessing.Queue()
+        gradient_queue = multiprocessing.SimpleQueue()
+        #gradientQueue = queue.Queue()
         processes = []
 
         num_agents = len(self.__agents)
@@ -85,11 +86,19 @@ class AsynchronousTrainer:
             agent = self.__agents[i]
             i = (i + 1) % num_agents
 
-            worker = AgentWorker(self.__hyperparameters, agent, gradientQueue)
+            
             #p = multiprocessing.Process(target=worker.run)
-            p = threading.Thread(target=worker.run)
+            p = threading.Thread(target=self.create_and_start_worker,
+                    args=(self.__hyperparameters, agent, gradient_queue))
             processes.append(p)
             p.start()
+
+        self.process_gradient_queue(gradient_queue)
+
+    def create_and_start_worker(self, hyperparams, agent, gradient_queue):
+        worker = AgentWorker(self.__hyperparameters, agent, gradient_queue)
+        worker.run()
+
 
     def process_gradient_queue(self, gradientQueue: multiprocessing.Queue):
         """
@@ -97,7 +106,10 @@ class AsynchronousTrainer:
         for new gradients. When any occur they are used to
         update the actor and critic networks.
         """
-        pass #TODO
+        while True:
+            # In case of multiprocessing -> blocks by default
+            grad = gradientQueue.get() 
+            print(grad)
 
 class AgentWorker:
     """
