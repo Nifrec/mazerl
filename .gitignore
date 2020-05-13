@@ -10,3 +10,5 @@ __pycache__
 
 # Ignore .DS_Store
 .DS_Store
+venv/
+.idea/

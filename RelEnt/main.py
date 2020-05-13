@@ -1,6 +1,6 @@
-from Environment.Grid import *
-from IRL.PolicyIterator import *
-from IRL.RelEnt import *
+from Grid import Grid
+from PolicyIterator import PolicyIterator
+from RelEnt import RelEnt
 
 import matplotlib.pyplot as plt
 
@@ -14,7 +14,8 @@ States locations as in the resulting pcolor graphs (with grid size 3):
     0 1 2
 """
 
-def perform_RelEnt(grid_size, n_demos):
+
+def perform_descrete_RelEnt(grid_size, n_demos):
     gw = Grid(grid_size)
     init_rewards = gw.rewards
 
@@ -46,4 +47,5 @@ def perform_RelEnt(grid_size, n_demos):
     fig.show()
     print(" ✓")
 
-perform_RelEnt(30, 20)
+
+perform_descrete_RelEnt(30, 10)

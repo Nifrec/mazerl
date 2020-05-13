@@ -19,6 +19,7 @@ class Grid:
         self.n_states = self.grid_size ** 2
 
         # Generate a maze
+        print("Generating a maze:")
         maze_generator = MazeGenerator(self.grid_size)
         self.rewards = maze_generator.generate_maze()
         self.start_state = coord_to_int(maze_generator.maze_start_point, grid_size)
@@ -81,11 +82,11 @@ class Grid:
         is_optimal = not (policy is None)
 
         if not is_optimal:
-            print("generating non optimal demos...", end=" ")
+            print("Generating non optimal demos...", end=" ")
             # Assigning random policy
             policy = np.random.choice(self.actions, size=self.n_states)
         else:
-            print("generating optimal demos...", end=" ")
+            print("Generating optimal demos...", end=" ")
 
         demos = []
 
