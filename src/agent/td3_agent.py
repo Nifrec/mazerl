@@ -6,10 +6,10 @@ import torch
 import numpy as np
 from typing import Iterable
 
-from agent.agent_class import Agent
-from agent.actor_network import ActorNetwork
-from agent.critic_network import CriticNetwork
-from .replay_memory import ReplayMemory
+from src.agent.agent_class import Agent
+from src.agent.actor_network import ActorNetwork
+from src.agent.critic_network import CriticNetwork
+from src.agent.replay_memory import ReplayMemory
 
 class TD3Agent(Agent):
     """

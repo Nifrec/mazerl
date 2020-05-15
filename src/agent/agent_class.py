@@ -24,12 +24,12 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from .auxiliary import Experience, HyperparameterTuple
-from .critic_network import CriticNetwork
-from .actor_network import ActorNetwork
-from .logger import Logger
-from .auxiliary import Mode
-from .replay_memory import ReplayMemory
+from src.agent.auxiliary import Experience, HyperparameterTuple
+from src.agent.critic_network import CriticNetwork
+from src.agent.actor_network import ActorNetwork
+from src.agent.logger import Logger
+from src.agent.auxiliary import Mode
+from src.agent.replay_memory import ReplayMemory
 
 
 class Agent():
@@ -163,13 +163,17 @@ class Agent():
         # https://discuss.pytorch.org/t/please-help-how-can-copy-the-gradient-from-net-a-to-net-b/41226/8
         #for net1,net2 in zip(A.named_parameters(),B.named_parameters()):
         #        net2[1].grad = net1[1].grad.clone()
-        critic_grad = [
-                param[1].grad.clone().cpu() for param in self.critic.named_parameters()
-        ]
+
+        # Index 0 is the name, index 1 is the actual data.
         actor_grad = [
-                param[1].grad.clone().cpu() for param in self.actor.named_parameters()
+                param[1].grad.clone().detach() for param in \
+                        self.actor.named_parameters()
         ]
-        return critic_grad, actor_grad
+        critic_grad = [
+                param[1].grad.clone().detach()for param in \
+                        self.critic.named_parameters()
+        ]
+        return actor_grad, critic_grad
 
     def reset_gradients(self):
         """

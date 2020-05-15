@@ -10,10 +10,10 @@ from typing import Any, Set
 import numpy as np
 import enum
 # Local imports
-from maze.distances import euclidean_dist, dist_line_to_line, \
+from src.maze.distances import euclidean_dist, dist_line_to_line, \
         dist_point_line_segment,is_ball_in_rect
-from maze.record_types import Size, Line, Ball
-from maze.abstract_visualizer import Visualizer
+from src.maze.record_types import Size, Line, Ball
+from src.maze.abstract_visualizer import Visualizer
 
 class MazeLayout():
     """

@@ -13,10 +13,10 @@ import torch.optim as optim
 import torch.nn.functional as F
 from typing import Any
 
-from agent.critic_network import CriticNetwork
-from agent.auxiliary import Mode
-from maze.environment_interface import WINDOW_HEIGHT, WINDOW_WIDTH
-from agent.settings import MAZE_ACTOR_OUT
+from src.agent.critic_network import CriticNetwork
+from src.agent.auxiliary import Mode
+from src.maze.environment_interface import WINDOW_HEIGHT, WINDOW_WIDTH
+from src.agent.settings import MAZE_ACTOR_OUT
 
 INPUT_CHANNELS = 1
 #CONV_LAYERS_OUT = 4 * (WINDOW_HEIGHT * WINDOW_WIDTH) // (6*4)

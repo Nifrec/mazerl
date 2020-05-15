@@ -15,10 +15,10 @@ import numpy as np
 import time
 
 # Local imports
-from .model import Model
-from .record_types import Size
-from .pygame_ghost_visualizer import GhostVisualizer
-from .maze_generator import MazeGenerator
+from src.maze.model import Model
+from src.maze.record_types import Size
+from src.maze.pygame_ghost_visualizer import GhostVisualizer
+from src.maze.maze_generator import MazeGenerator
 
 
 WINDOW_WIDTH = 800

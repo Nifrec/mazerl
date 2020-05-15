@@ -23,16 +23,16 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from .network import Network
-from .replay_memory import ReplayMemory
-from .auxiliary import Experience, HyperparameterTuple
-from .auxiliary import compute_moving_average, \
+from src.agent.network import Network
+from src.agent.replay_memory import ReplayMemory
+from src.agent.auxiliary import Experience, HyperparameterTuple
+from src.agent.auxiliary import compute_moving_average, \
         compute_moving_average_when_enough_values, \
         plot_reward_and_moving_average, clip,\
         setup_save_dir, make_setup_info_file
-from .logger import Logger
-from .agent_class import Agent
-from .td3_agent import TD3Agent
+from src.agent.logger import Logger
+from src.agent.agent_class import Agent
+from src.agent.td3_agent import TD3Agent
 
 
 class Trainer:

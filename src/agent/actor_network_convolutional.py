@@ -6,9 +6,9 @@ Lulof Pirée
 
 import torch
 import torch.nn as nn
-from agent.actor_network import ActorNetwork
-from maze.environment_interface import WINDOW_HEIGHT, WINDOW_WIDTH
-from agent.settings import MAZE_ACTOR_OUT
+from src.agent.actor_network import ActorNetwork
+from src.maze.environment_interface import WINDOW_HEIGHT, WINDOW_WIDTH
+from src.agent.settings import MAZE_ACTOR_OUT
 
 INPUT_CHANNELS = 1
 #CONV_LAYERS_OUT = 4 * (WINDOW_HEIGHT * WINDOW_WIDTH) // (6*4)

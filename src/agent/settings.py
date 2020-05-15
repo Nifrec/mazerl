@@ -29,6 +29,6 @@ CHECKPOINT_INTERVAL=100
 
 # Asynchronous mode hyperparameters:
 SYNC_GRAD_INTERVAL = 10
-
+NUM_ASYNC_WORKERS = 5
 
 

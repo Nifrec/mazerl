@@ -14,7 +14,7 @@ import os
 from numbers import Number
 import torch
 # Local imports
-from .network import Network
+from src.agent.network import Network
 
 DEFAULT_PERIOD = 1000
 FILENAME_ESTIMATIONS = "values_estimates.txt"

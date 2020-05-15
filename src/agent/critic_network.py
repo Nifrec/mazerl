@@ -12,8 +12,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from agent.network import Network
-from agent.auxiliary import Mode
+from src.agent.network import Network
+from src.agent.auxiliary import Mode
 
 HIDDEN_LAYER_1_SIZE = 256
 HIDDEN_LAYER_2_SIZE = 256

@@ -21,24 +21,29 @@ import os
 import multiprocessing
 import threading
 import time
+import sys
+import copy
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+from torch.autograd import Variable
 
-from .network import Network
-from .replay_memory import ReplayMemory
-from agent.auxiliary import Experience, AsyncHyperparameterTuple
-from .auxiliary import compute_moving_average, \
+from src.agent.network import Network
+from src.agent.replay_memory import ReplayMemory
+from src.agent.auxiliary import Experience, AsyncHyperparameterTuple
+from src.agent.auxiliary import compute_moving_average, \
         compute_moving_average_when_enough_values, \
         plot_reward_and_moving_average, clip,\
         setup_save_dir, make_setup_info_file, \
         create_environment
         
-from .logger import Logger
-from .agent_class import Agent
-from .td3_agent import TD3Agent
+from src.agent.logger import Logger
+from src.agent.agent_class import Agent
+from src.agent.td3_agent import TD3Agent
+from src.agent.critic_network import CriticNetwork
+from src.agent.actor_network import ActorNetwork
 
 
 
@@ -53,7 +58,8 @@ class AsynchronousTrainer:
     """
 
     def __init__(self, hyperparameters: AsyncHyperparameterTuple,
-            agents: Tuple[Agent, ...], logger: Logger, num_processes: int):
+            agents: Tuple[Agent, ...], actor: ActorNetwork, 
+            critic: CriticNetwork, logger: Logger, num_processes: int):
         """
         Initialize the TD3 training algorithm, set up Gym environment,
         create file with setup info.
@@ -70,9 +76,27 @@ class AsynchronousTrainer:
         self.__agents = agents
         self.__logger = logger
         self.__num_processes = num_processes
+        # Needs a reference to do central parameter optimization.
+        self.clone_networks(actor, critic)
+        self.__critic = copy.deepcopy(critic)
+        self.__actor_optim = optim.Adam(params=self.__actor.parameters(),
+                lr=self.__hyperparameters.learning_rate_actor)
+        self.__critic_optim = optim.Adam(params=self.__critic.parameters(), 
+                lr=self.__hyperparameters.learning_rate_critic)
+
+        central_critic = agents[0]
         # Prefer CUDA (=GPU), which is normally faster.
-        device = \
+        self.__device = \
                 torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    def clone_networks(self, actor, critic):
+        self.__actor = type(actor)(actor.input_size, actor.output_size)
+        new_params = self.__actor.named_parameters()
+        old_params = actor.named_parameters()
+        for new_param, old_param in zip(new_params, old_params):
+            new_param[1].data.copy_(old_param[1].data.clone().detach())
+        
+
 
     def train(self):
 
@@ -85,11 +109,11 @@ class AsynchronousTrainer:
         for _ in range(self.__num_processes):
             agent = self.__agents[i]
             i = (i + 1) % num_agents
-
             
-            #p = multiprocessing.Process(target=worker.run)
+            # p = multiprocessing.Process(target=self.create_and_start_worker,
+            #         args=(self.__hyperparameters, agent, gradient_queue))
             p = threading.Thread(target=self.create_and_start_worker,
-                    args=(self.__hyperparameters, agent, gradient_queue))
+                   args=(self.__hyperparameters, agent, gradient_queue))
             processes.append(p)
             p.start()
 
@@ -99,7 +123,6 @@ class AsynchronousTrainer:
         worker = AgentWorker(self.__hyperparameters, agent, gradient_queue)
         worker.run()
 
-
     def process_gradient_queue(self, gradientQueue: multiprocessing.Queue):
         """
         Enter a loop in which a gradientQueue is constantly being checked
@@ -108,8 +131,28 @@ class AsynchronousTrainer:
         """
         while True:
             # In case of multiprocessing -> blocks by default
-            grad = gradientQueue.get() 
-            print(grad)
+            grads = gradientQueue.get() 
+            #print(grad)
+            self.optimize_networks(grads)
+
+    def optimize_networks(self, worker_grads: tuple):
+        #sys.exit()
+        self.__actor_optim.zero_grad()
+        self.__critic_optim.zero_grad()
+
+        with torch.no_grad():
+            actor_grads, critic_grads = worker_grads
+            for actor_param, actor_grad in zip(self.__actor.named_parameters(), actor_grads):
+                #print(actor_param)
+                actor_param[1].grad = Variable(actor_grad.detach().to(self.__device))
+
+        # for critic_param, critic_grad in zip(self.__critic.named_parameters(), critic_grads):
+        #     critic_param[1].grad += critic_grad.detach()
+
+            self.__actor_optim.step()
+        # self.__critic_optim.step()
+        # No zero_grad() needed as the grad values are directly overridden.
+
 
 class AgentWorker:
     """

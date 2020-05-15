@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+
 """
 Main file giving a single access point to the project:
 from this file the human interface can be launched 
@@ -9,7 +9,8 @@ or load a trained agent.
 Author: Lulof Pirée
 """
 import argparse
-import main_training
+# Local imports
+import src.main_training
 
 COMMANDS = ("human", "train", "load")
     
@@ -41,10 +42,10 @@ if (args.command == "human"):
 elif (args.command == "train"):
     asynchronous = args.asynchronous
     if args.environment == "maze":
-        main_training.start_training(main_training.Environments.maze,
+        src.main_training.start_training(src.main_training.Environments.maze,
                 asynchronous)
     elif args.environment == "gym-lunarlander":
-        main_training.start_training(main_training.Environments.lunarlander,
+        src.main_training.start_training(src.main_training.Environments.lunarlander,
                 asynchronous)
 
 elif (args.command == "load"):

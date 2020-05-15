@@ -14,9 +14,9 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 import numpy as np
 # Local imports
-from maze.record_types import Ball, Line, Size
-from maze.abstract_visualizer import Visualizer
-from .model import Model
+from src.maze.record_types import Ball, Line, Size
+from src.maze.abstract_visualizer import Visualizer
+from src.maze.model import Model
 
 class PygameVisualizer(Visualizer):
     """

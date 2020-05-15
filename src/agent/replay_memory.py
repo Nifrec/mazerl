@@ -8,7 +8,7 @@ import random
 import torch
 from typing import Iterable, Tuple
 
-from .auxiliary import Experience
+from src.agent.auxiliary import Experience
 
 class ReplayMemory():
     """

@@ -6,7 +6,7 @@ Lulof Pirée
 """
 
 import torch
-from .network import Network
+from src.agent.network import Network
 
 class ActorNetwork(Network):
 

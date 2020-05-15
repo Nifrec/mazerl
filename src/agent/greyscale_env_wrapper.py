@@ -7,7 +7,7 @@ Author: Lulof Pirée
 import numpy as np
 from typing import Iterable, Tuple
 from numbers import Number
-from maze.environment_interface import Environment, WINDOW_HEIGHT, WINDOW_WIDTH
+from src.maze.environment_interface import Environment, WINDOW_HEIGHT, WINDOW_WIDTH
 
 
 class GreyScaleEnvironment(Environment):

@@ -11,19 +11,19 @@ import enum
 import multiprocessing
 from typing import Any, Tuple
 # Local imports
-from agent.auxiliary import HyperparameterTuple, AsyncHyperparameterTuple, \
+from src.agent.auxiliary import HyperparameterTuple, AsyncHyperparameterTuple, \
     get_timestamp, setup_save_dir,\
     make_setup_info_file, Mode, Environments, create_environment
-from agent.trainer import Trainer
-from agent.async_trainer import AsynchronousTrainer
-from agent.logger import Logger
-from agent.agent_class import Agent
-from agent.td3_agent import TD3Agent
-from agent.actor_network import ActorNetwork
-from agent.critic_network import CriticNetwork
-from agent.actor_network_convolutional import ActorCNN
-from agent.critic_network_convolutional import CriticCNN
-import agent.settings as settings
+from src.agent.trainer import Trainer
+from src.agent.async_trainer import AsynchronousTrainer
+from src.agent.logger import Logger
+from src.agent.agent_class import Agent
+from src.agent.td3_agent import TD3Agent
+from src.agent.actor_network import ActorNetwork
+from src.agent.critic_network import CriticNetwork
+from src.agent.actor_network_convolutional import ActorCNN
+from src.agent.critic_network_convolutional import CriticCNN
+import src.agent.settings as settings
 
 def start_training(env_name: Environments, asynchronous: bool = False):
     checkpoint_dir = __create_checkpoint_dir_if_needed()
@@ -34,7 +34,7 @@ def start_training(env_name: Environments, asynchronous: bool = False):
         hyperparameters = __create_async_hyperparameters(checkpoint_dir, env_name)
     __create_run_directory(hyperparameters)
     actor, critic = __create_networks(env_name)
-    agent = __create_agent(hyperparameters, checkpoint_dir, actor, critic)
+    agent = create_agent(hyperparameters, checkpoint_dir, actor, critic)
 
     logger = Logger(hyperparameters)
     if not asynchronous:
@@ -42,7 +42,9 @@ def start_training(env_name: Environments, asynchronous: bool = False):
     else:
         # CUDA demands this start method.
         multiprocessing.set_start_method('spawn')
-        trainer = AsynchronousTrainer(hyperparameters, (agent,), logger, 5)
+        num_processes = settings.NUM_ASYNC_WORKERS
+        trainer = AsynchronousTrainer(hyperparameters, (agent,), actor, critic,
+                logger, num_processes)
 
     trainer.train()
 
@@ -74,7 +76,7 @@ def __create_run_directory(hyperparameters: HyperparameterTuple):
     make_setup_info_file(hyperparameters)\
 
 
-def __create_agent(hyperparameters: HyperparameterTuple,
+def create_agent(hyperparameters: HyperparameterTuple,
                    checkpoint_dir: str, actor: ActorNetwork, critic: CriticNetwork) -> Agent:
     agent: Agent
 
@@ -94,7 +96,8 @@ def __create_networks(env_name: Environments) \
         actor_net = ActorNetwork(settings.LUNAR_ACTOR_IN,
                                  settings.LUNAR_ACTOR_OUT)
         critic_net = CriticNetwork(settings.LUNAR_CRITIC_IN,
-                                   settings.LUNAR_CRITIC_OUT, mode=settings.MODE)
+                                   settings.LUNAR_CRITIC_OUT,
+                                   mode=settings.MODE)
     elif (env_name == Environments.maze):
         # Input and output sizes ignored by the CNNs
         actor_net = ActorCNN(0, 0)

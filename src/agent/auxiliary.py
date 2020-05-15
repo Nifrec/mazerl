@@ -13,7 +13,7 @@ import collections
 import enum
 import gym
 
-from .greyscale_env_wrapper import GreyScaleEnvironment
+from src.agent.greyscale_env_wrapper import GreyScaleEnvironment
 
 # This is a class not an instance!
 # See main.py for example use and more explanation.
@@ -64,9 +64,15 @@ class Mode(enum.Enum):
     DDPG = 1
     TD3 = 2
 
+    def __eq__(self, other):
+        return self.value == other.value
+
 class Environments(enum.Enum):
     maze = 1
     lunarlander = 2
+
+    def __eq__(self, other):
+        return self.value == other.value
 
 def compute_moving_average(values, period):
     """
@@ -208,4 +214,4 @@ def create_environment(env_name: Environments) -> Any:
     elif (env_name == Environments.maze):
         return GreyScaleEnvironment()
     else:
-        raise ValueError(f"Invalid environment name given:'{env_name}''")
+        raise ValueError(f"Invalid environment name given:'{env_name}'")

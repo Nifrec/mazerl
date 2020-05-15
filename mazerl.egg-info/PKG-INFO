@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: mazerl
+Version: 0.1
+Summary: Maze environment for reinforcement-learning
+Home-page: https://github.com/Nifrec/mazerl
+Author: Lulof Pirée
+Author-email: UNKNOWN
+License: AGPL-3.0
+Description: UNKNOWN
+Platform: Linux
