@@ -19,11 +19,11 @@ import pygame
 import numpy as np
 import time
 
-from maze.model import Model, MazeLayout
-from maze.record_types import Size, Line
-from maze.pygame_visualizer import PygameVisualizer
-from maze.pygame_ghost_visualizer import GhostVisualizer
-from maze.maze_generator import MazeGenerator
+from src.maze.model import Model, MazeLayout
+from src.maze.record_types import Size, Line
+from src.maze.pygame_visualizer import PygameVisualizer
+from src.maze.pygame_ghost_visualizer import GhostVisualizer
+from src.maze.maze_generator import MazeGenerator
 
 
 FPS = 30
