@@ -117,7 +117,7 @@ class Grid:
 
             if (current_state == self.goal_state and is_optimal) or \
                     not is_optimal:
-                demo.append(self.get_feature(self.goal_state))
+                demo.append(self.get_feature(current_state))
                 #print(current_state)
 
                 # If successful demo, save it

@@ -12,6 +12,7 @@ class RelEnt:
         :param optimal_demos: array of feature matrices of optimal demos
         :param nonoptimal_demos: array of feature matrices of not optimal demos
         """
+
         self.optimal_demos = optimal_demos
         self.nonoptimal_demos = nonoptimal_demos
 
@@ -78,6 +79,7 @@ class RelEnt:
             if epoch % print_every == 0:
                 #print("Value of objective is: " + str(self.calculate_objective()))
                 pass
+
 
 
 def feature_averages(demo, gamma=0.99):
