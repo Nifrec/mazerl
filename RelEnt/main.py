@@ -15,8 +15,8 @@ States locations as in the resulting pcolor graphs (with grid size 3):
 """
 
 
-def perform_descrete_RelEnt(grid_size, n_demos):
-    gw = Grid(grid_size)
+def perform_descrete_RelEnt(grid_size, n_demos, epsilon, random_start):
+    gw = Grid(grid_size, epsilon)
     init_rewards = gw.rewards
 
     # Obtain the optimal policy for the environment to generate optimal demonstrations
@@ -24,10 +24,13 @@ def perform_descrete_RelEnt(grid_size, n_demos):
     optimal_policy = pi.policy_iteration(100)
 
     # Generate simulated demos
-    optimal_demos = gw.generate_demos(optimal_policy, n_demos)
+    print("Generating optimal demos:")
+    optimal_demos = gw.generate_demos(optimal_policy, n_demos, random_start)
+    print ("Generating non optimal demos:")
     nonoptimal_demos = gw.generate_demos(None, n_demos)
 
     # Train RelEnt
+    print("Training:")
     relent = RelEnt(optimal_demos, nonoptimal_demos)
     relent.train()
 
@@ -48,4 +51,9 @@ def perform_descrete_RelEnt(grid_size, n_demos):
     print(" ✓")
 
 
-perform_descrete_RelEnt(30, 10)
+grid_size = 30
+nr_demos = 10
+epsilon = 0.0
+random_start = (False, 0.0)
+
+perform_descrete_RelEnt(grid_size, nr_demos, epsilon, random_start)

@@ -2,6 +2,7 @@ from MazeGenerator import *
 from conversions import *
 
 import numpy as np
+import sys
 
 
 class Grid:
@@ -20,10 +21,10 @@ class Grid:
 
         # Generate a maze
         print("Generating a maze:")
-        maze_generator = MazeGenerator(self.grid_size)
-        self.rewards = maze_generator.generate_maze()
-        self.start_state = coord_to_int(maze_generator.maze_start_point, grid_size)
-        self.goal_state  = coord_to_int(maze_generator.maze_end_point, grid_size)
+        self.maze_generator = MazeGenerator(self.grid_size)
+        self.rewards = self.maze_generator.generate_maze()
+        self.start_state = coord_to_int(self.maze_generator.maze_start_point, grid_size)
+        self.goal_state  = coord_to_int(self.maze_generator.maze_end_point, grid_size)
 
         print("START STATE = ", self.start_state)
         print("GOAL STATE = ", self.goal_state)
@@ -70,35 +71,57 @@ class Grid:
 
         return coord_to_int(next_state, self.grid_size)
 
-    def generate_demos(self, policy=None, n_demos=10):
+    def get_random_start(self, random_percentage):
+        """
+        Selects a random cells in a maze to start a demo from
+        NOTE:: it actually doesnt learn well when not starting from the same point all the time
+        :param random_percentage: [0,1] how often you wanna select random start
+        :return: selected state
+        """
+        if np.random.uniform() <= (1 - random_percentage):
+            return self.start_state
+        while True:
+            start_state = np.random.randint(0, self.grid_size**2 - 1)
+            start_cell = int_to_coord(start_state, self.grid_size)
+            if start_cell in self.maze_generator.maze_cells or \
+               start_cell in self.maze_generator.distraction_cells:
+                return start_state
+
+    def generate_demos(self, policy=None, n_demos=10, random_start=(True, 0.1)):
         """
         Generates a given number of demos for either optimal or random routes
         NOTE:: uncomment print statements to see demos
         :param policy: supplied for optimal deemos
         :param n_demos: int
+        :random_start: bool
         :return: np.array of feature vectors of demos
         """
         # Whether we're generating optimal demos or random ones
         is_optimal = not (policy is None)
 
         if not is_optimal:
-            print("Generating non optimal demos...", end=" ")
             # Assigning random policy
             policy = np.random.choice(self.actions, size=self.n_states)
-        else:
-            print("Generating optimal demos...", end=" ")
 
         demos = []
+        demo_id = 0
 
         # For the optimal
-        start_state = self.start_state
         goal_state = self.goal_state
 
-        max_demo_len = self.grid_size * 3
+        max_demo_len = self.grid_size * 10
 
         while len(demos) < n_demos:
+            sys.stdout.write ('\r')
+            percentage = (demo_id + 1) / n_demos
+            sys.stdout.write ("[%-20s] %d%%" % ('=' * int (20 * percentage), 100 * percentage))
+            sys.stdout.flush ()
+
             demo = []
-            current_state = start_state
+            if random_start[0]:
+                current_state = self.get_random_start (random_start[1])
+            else:
+                current_state = self.start_state
 
             if not is_optimal:
                 # Randomize new endpoints for the new demo if not optimal
@@ -122,8 +145,9 @@ class Grid:
 
                 # If successful demo, save it
                 demos.append(np.array(demo))
+                demo_id += 1
 
-        print("✓")
+        print(" ✓")
         return np.array(demos)
 
     def get_transition_probabilities(self, state, action):

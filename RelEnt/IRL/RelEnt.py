@@ -75,7 +75,6 @@ class RelEnt:
             # One weird trick to ensure that the weights don't blow up the objective
             self.weights = self.weights / np.linalg.norm(self.weights, keepdims=True)
 
-
             if epoch % print_every == 0:
                 #print("Value of objective is: " + str(self.calculate_objective()))
                 pass
