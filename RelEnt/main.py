@@ -15,7 +15,7 @@ States locations as in the resulting pcolor graphs (with grid size 3):
 """
 
 
-def perform_descrete_RelEnt(grid_size, n_demos, epsilon, random_start):
+def perform_descrete_RelEnt(grid_size, n_demos, human_input, epsilon, random_start):
     gw = Grid(grid_size, epsilon)
     init_rewards = gw.rewards
 
@@ -23,11 +23,20 @@ def perform_descrete_RelEnt(grid_size, n_demos, epsilon, random_start):
     pi = PolicyIterator(gw)
     optimal_policy = pi.policy_iteration(100)
 
-    # Generate simulated demos
-    print("Generating optimal demos:")
-    optimal_demos = gw.generate_demos(optimal_policy, n_demos, random_start)
-    print ("Generating non optimal demos:")
-    nonoptimal_demos = gw.generate_demos(None, n_demos)
+    if human_input:
+        # Show the maze to a human
+        gw.generate_maze_image ()
+        # Request demos from human
+        print ("Requesting optimal demos:")
+        optimal_demos = gw.request_human_demos(optimal_policy, n_demos)
+        print ("Requesting non optimal demos:")
+        nonoptimal_demos = gw.request_human_demos(None, n_demos)
+    else:
+        # Generate simulated demos
+        print("Generating optimal demos:")
+        optimal_demos = gw.generate_demos(optimal_policy, n_demos, random_start)
+        print ("Generating non optimal demos:")
+        nonoptimal_demos = gw.generate_demos(None, n_demos)
 
     # Train RelEnt
     print("Training:")
@@ -51,9 +60,10 @@ def perform_descrete_RelEnt(grid_size, n_demos, epsilon, random_start):
     print(" ✓")
 
 
-grid_size = 30
-nr_demos = 10
+grid_size = 7
+nr_demos = 7
+human_input = True
 epsilon = 0.0
 random_start = (False, 0.0)
 
-perform_descrete_RelEnt(grid_size, nr_demos, epsilon, random_start)
+perform_descrete_RelEnt(grid_size, nr_demos, human_input, epsilon, random_start)

@@ -3,6 +3,7 @@ from conversions import *
 
 import numpy as np
 import sys
+import matplotlib.pyplot as plt
 
 
 class Grid:
@@ -71,6 +72,56 @@ class Grid:
 
         return coord_to_int(next_state, self.grid_size)
 
+    def get_optimal_demo(self, optimal_policy):
+        demo = []
+        current_state = self.start_state
+
+        while current_state != self.goal_state:
+            # Add current state to the demo
+            demo.append (current_state)
+            # Perform action according to a policy, get next state
+            current_state = self.result_of_action (current_state, optimal_policy[current_state])
+
+        if current_state == self.goal_state:
+            demo.append (current_state)
+
+        return demo
+
+    def generate_maze_image(self):
+        fig, ax = plt.subplots (nrows=1, ncols=1, figsize=(self.grid_size, self.grid_size))
+
+        c1 = ax.pcolor (self.rewards, edgecolors='k', linewidths=2)
+        plt.colorbar (c1, ax=ax)
+
+        offset = 0.2
+
+        for state in range(self.grid_size**2):
+            state_cell = int_to_coord(state, self.grid_size)
+            x = state_cell[1] + offset
+            y = state_cell[0] + offset
+            plt.text(x, y, str(state),
+                     fontsize=20, fontweight=30, color="red")
+
+        fig.show ()
+
+    def request_human_demos(self, optimal_policy=None, n_demos=10):
+
+        if optimal_policy is not None:
+            # Provide a human with the optimal Q trajectory
+            optimal_demo = self.get_optimal_demo(optimal_policy)
+            print("\nSuggested optimal demo:\n", optimal_demo)
+
+        demos = []
+
+        for i in range(n_demos):
+            # Ask for a new demo
+            progress = str(i+1) + "/" + str(n_demos) + ": "
+            demo_string = input(progress)
+            demo = [self.get_feature(int(state)) for state in demo_string.split()]
+            demos.append(demo)
+
+        return demos
+
     def get_random_start(self, random_percentage):
         """
         Selects a random cells in a maze to start a demo from
@@ -91,7 +142,7 @@ class Grid:
         """
         Generates a given number of demos for either optimal or random routes
         NOTE:: uncomment print statements to see demos
-        :param policy: supplied for optimal deemos
+        :param policy: supplied for optimal demos
         :param n_demos: int
         :random_start: bool
         :return: np.array of feature vectors of demos
