@@ -19,12 +19,14 @@ import pygame
 import numpy as np
 import time
 import pandas as pd
+import sys
 
 from maze.model import Model, MazeLayout
 from maze.record_types import Size, Line
 from maze.pygame_visualizer import PygameVisualizer
 from maze.pygame_ghost_visualizer import GhostVisualizer
 from maze.maze_generator import MazeGenerator
+from maze.environment_interface import Environment, WINDOW_HEIGHT, WINDOW_WIDTH
 
 
 FPS = 30
@@ -47,6 +49,8 @@ class HumanInterface():
             fullscreen: bool=False):
 
         pygame.init()
+
+        np.set_printoptions(threshold=sys.maxsize)
 
         # joystick initialization
         pygame.joystick.init()
@@ -193,8 +197,12 @@ class HumanInterface():
         blue = pygame.surfarray.pixels_blue(self.__screen)
         return np.array([red, green, blue])
 
+    def grayscale_observation_array(self):
+        array = self.create_observation_array()
+        return array.mean(axis=0).reshape(1, WINDOW_WIDTH, WINDOW_HEIGHT)
+
     def record_training_example(self):
-        state = self.create_observation_array()
+        state = self.grayscale_observation_array()
         action = (self.x_acc, self.y_acc)
 
         self.episode_states.append(state)
@@ -206,8 +214,7 @@ class HumanInterface():
         now = time.localtime(time.time())
         timestamp = "{}-{}-{}_{}:{}:{}".format(now.tm_mday, now.tm_mon, now.tm_year, str(now.tm_hour).rjust(2, '0'),
                                                str(now.tm_min).rjust(2, '0'), str(now.tm_sec).rjust(2, '0'))
-        # store data from completed episode as a csv file
-        pd.DataFrame(episode_data).to_csv("./human_input/training_data/" + timestamp + ".csv")
+        pd.DataFrame(episode_data).to_csv("./human_input/training_data/" + timestamp + ".csv", index=False)
 
     def __create_test_maze(self):
         """
