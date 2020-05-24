@@ -69,29 +69,29 @@ class Convnet(Model):
         return new_data
 
     def train(self):
-        "train the model"
+        """train the model"""
         steps = math.ceil(len(self.training_data))
         losses = []
         accuracies = []
         for epoch in range(self.num_epochs):
             for i, (images, labels) in enumerate(self.training_data):
-                # Run the forward pass
+                # forward propagation
                 outputs = self.model(images)
                 loss = self.loss_function(outputs, labels)
                 losses.append(loss.item())
 
-                # Backprop and perform Adam optimisation
+                # back propagation
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
 
-                # Track the accuracy
+                # record the accuracy
                 total = labels.size(0)
                 _, predicted = torch.max(outputs.data, 1)
                 correct = (predicted == labels).sum().item()
                 accuracies.append(correct / total)
 
-                # per 100 steps
+                # per 100 steps, print stats
                 if (i + 1) % 100 == 0:
                     print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%'
                           .format(epoch + 1, self.num_epochs, i + 1, steps, loss.item(),
